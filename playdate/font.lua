@@ -7,6 +7,10 @@ local meta = {}
 meta.__index = meta
 module.__index = meta
 
+-- TODO figure out correct values, if necesssary
+module.kLanguageEnglish = "English"
+module.kLanguageJapanese = "Japanese"
+
 function module.new(path)
   local font = setmetatable({}, meta)
   font.data = love.graphics.newFont(path..".fnt")
