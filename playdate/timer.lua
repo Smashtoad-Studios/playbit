@@ -143,8 +143,8 @@ function module.updateTimers()
     timer.currentTime = timer.currentTime + dt
     if timer.currentTime <= timer.duration then
       -- timer still running
-      updateTimer(timer)
       updateTimerValue(timer)
+      updateTimer(timer)
       goto continue
     end
 
@@ -174,8 +174,8 @@ function module.updateTimers()
       -- continue off from where the timer ended so there isn't a huge gap on first tick
       timer.currentTime = ct - timer.duration 
 
-      updateTimer(timer)
       updateTimerValue(timer)
+      updateTimer(timer)
     else
       -- complete timer
       timer.active = false
@@ -188,7 +188,7 @@ function module.updateTimers()
       end
 
       if timer.discardOnCompletion then
-        table.insert(timers, self)
+        table.insert(timersToRemove, self)
       end
     end
 
