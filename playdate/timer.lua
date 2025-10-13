@@ -1,247 +1,176 @@
-local module = {}
-playdate.timer = module
+require("playbit/playdate/baseTimer")
 
-local meta = {}
-meta.__index = meta
-module.__index = meta
+class("timer").extends("baseTimer")
+
+playdate.timer = timer
 
 local timers = {}
 local timersToRemove = {}
 
-function module.new(duration, startValue, ...)
-  local f = nil
-	local args = nil
-	local endValue = nil
-	local easingFunction = nil
+---Creates and automatically starts a new timer. Timers are stored as contiguous arrays for faster updates.
+---@param duration Number of frames the timer should run. 
+function timer.new(numberOfFrames, ...)
+	@@ASSERT(type(numberOfFrames) == "number", "[ERR] playdate.timer.new numberOfFrames is not passed in or is a not number")
+	
+	local timer = timer(numberOfFrames, ...)
+	table.insert(timers, timer)
 
-	if type(startValue) == "function" then
-		f = startValue
-		if select("#", ...) > 0 then
-			args = table.pack(...)
-		end
-		startValue = nil
-	else
-		endValue, easingFunction = select(1, ...)
-	end
-
-  local timer = setmetatable({}, meta)
-  timer._remainingDelay = nil 
-  timer._hasReversed = false
-
-  timer.currentTime = 0
-  timer.startValue = startValue or 0
-	timer.endValue = endValue or 0
-  timer.duration = duration
-  timer.easingFunction = easingFunction or playdate.easingFunctions.linear
-	timer.value = timer.startValue
-	timer.active = true
-	timer.delay = 0
-	timer.paused = false
-	timer.reverses = false
-	timer.reverseEasingFunction = nil
-	timer.repeats = false
-	timer.discardOnCompletion = true
-	timer.easingAmplitude = nil
-	timer.easingPeriod = nil
-	timer.updateCallback = nil
-	timer.timerEndedCallback = f or nil
-	timer.timerEndedArgs = args or nil
-
-	timer.originalValues = {}
-	timer.originalValues.startValue = timer.startValue
-	timer.originalValues.endValue = timer.endValue
-	timer.originalValues.easingFunction = timer.easingFunction
-
-  table.insert(timers, timer)
-
-  return timer
+	return timer
 end
 
-function module.performAfterDelay(delay, func, ...)
-	error("[ERR] playdate.timer.performAfterDelay() is not yet implemented.")
+function timer.updateTimers()
+	timer.super.updateTimers(timers, timersToRemove)
 end
 
-function module.keyRepeatTimerWithDelay(initialDelay, repeatDelay, func, ...)
-  error("[ERR] playdate.timer.keyRepeatTimerWithDelay() is not yet implemented.")
+---Convinence function for calling playdate.timer.new
+---@param frameDelay the number of frames until the callbackFunction is called
+---@param callbackFunction the function to call once this timer finishes
+function timer.performAfterDelay(frameDelay, callbackFunction, ...)
+	@@ASSERT(type(frameDelay) == "number", "[ERR] playdate.timer.performAfterDelay frameDelay parameter needs to be a number")
+	@@ASSERT(type(callbackFunction) == "function" , "[ERR] playdate.timer.performAfterDelay callbackFunction parameter needs to be a function")
+	
+	return timer.new(frameDelay, callbackFunction, ...)
 end
 
-function module.keyRepeatTimer(func, ...)
-	error("[ERR] playdate.timer.keyRepeatTimer() is not yet implemented.")
-end
-
-local function updateTimerValue(timer)
-  if timer.startValue ~= timer.endValue and timer.duration ~= 0 then
-    timer.value = timer.easingFunction(
-      timer.currentTime, timer.startValue, timer.endValue - timer.startValue, 
-      timer.duration, timer.easingAmplitude, timer.easingPeriod
-    )
-  else
-    timer.value = timer.endValue
-  end
-end
-
-local function updateTimer(timer)
-  if not timer.updateCallback then
-    return
-  end
-
-  if timer.timerEndedArgs then
-    timer.updateCallback(table.unpack(timer.timerEndedArgs))
-  else
-    timer.updateCallback(timer)
-  end
-end
-
-local function completeTimer(timer)
-  if not timer.timerEndedCallback then
-    return
-  end
-
-  if timer.timerEndedArgs then
-    timer.timerEndedCallback(table.unpack(timer.timerEndedArgs))
-  else
-    timer.timerEndedCallback(timer)
-  end
-end
-
-function module.updateTimers()
-  local currentTime = playdate.getCurrentTimeMilliseconds()
-
-  for i = 1, #timers do
-    local timer = timers[i]
-
-    if not timer.active or timer.paused then
-      -- skip inactive timers
-      goto continue
-    end
-
-    --[[
-      Delta time should be calculated outside of the loop, not per timer. This causes an issue where paused timers that
-      are later resumed suddenly jump forward. This is a bug in the PD SDK, so retaining it in Playbit until fixed
-      https://devforum.play.date/t/playdate-timer-value-increases-between-calling-pause-and-start/2096/12
-    ]]--
-    local dt = 0
-    if timer._lastTime then
-      dt = currentTime - timer._lastTime
-    end
-    timer._lastTime = currentTime
-
-    -- start delay
-    if not timer._remainingDelay then 
-      --[[
-        remainingDelay is intially sent to nil so delay can be 
-        set after the timer is created without having to call reset() afterwards
-      ]]--
-      timer._remainingDelay = timer.delay
-    end
-    if timer._remainingDelay > 0 then
-      timer._remainingDelay = timer._remainingDelay - dt
-      goto continue
-    end
-
-    -- update timer
-    timer.currentTime = timer.currentTime + dt
-    if timer.currentTime <= timer.duration then
-      -- timer still running
-      updateTimerValue(timer)
-      updateTimer(timer)
-      goto continue
-    end
-
-    -- timer complete
-    if timer.reverses and not timer._hasReversed then
-      -- reverse timer
-      local temp = timer.startValue
-      timer.startValue = timer.endValue
-      timer.endValue = temp
-      timer.currentTime = 0
-      timer._remainingDelay = timer.delay
-
-      if timer.reverseEasingFunction then
-        timer.easingFunction = timer.reverseEasingFunction
-      end
-
-      -- so we don't reverse a second time (set repeats to true to do that)
-      timer._hasReversed = true 
-    elseif timer.repeats then
-      -- repeat timer
-      completeTimer(timer)
-
-      local ct = timer.currentTime
-      timer:reset()
-      -- record that the callback was invoked while repeating
-      timer._calledOnRepeat = true 
-      -- continue off from where the timer ended so there isn't a huge gap on first tick
-      timer.currentTime = ct - timer.duration 
-
-      updateTimerValue(timer)
-      updateTimer(timer)
-    else
-      -- complete timer
-      timer.active = false
-      timer.currentTime = timer.duration
-      timer.value = timer.endValue
-
-      -- when .repeats is true, then set to false, we shouldn't ever invoke the callback again
-      if not timer._calledOnRepeat then
-        completeTimer(timer)
-      end
-
-      if timer.discardOnCompletion then
-        table.insert(timersToRemove, self)
-      end
-    end
-
-    ::continue::
-  end
-  
-  -- remove timers
-  for i = 1, #timersToRemove do
-    local t = timersToRemove[i]
-		local index = table.indexOfElement(timersToRemove, t)
-		if index then 
-			table.remove(timers, index)
-		end
-	end
-	timersToRemove = {}
-end
-
-function module.allTimers()
+function timer.allTimers()
 	return timers
 end
 
-meta.__index = function(table, key)
-	if key == "running" then
-		return not table.paused
-	elseif key == "timeLeft" then
-		return math.max(0, table.duration - table.currentTime)
-	else
-		return rawget(meta, key)
+function timer:remove()
+	timer.super.remove(self)
+	timersToRemove[#timersToRemove + 1] = self
+end
+
+---@return returns true if the timer advanced and was not delayed
+function timer:advanceTimer()
+	local dt = love.timer.getDelta() * 1000
+	
+	-- start delay
+	if not self._remainingDelay then 
+		--[[
+		remainingDelay is intially sent to nil so delay can be 
+		set after the timer is created without having to call reset() afterwards
+		]]--
+		self._remainingDelay = self.delay
 	end
+	
+	if self._remainingDelay > 0 then
+		self._remainingDelay = self._remainingDelay - dt
+		return false
+	end
+		
+	self._lastTime = self.currentDuration
+    -- update timer
+    self.currentDuration = self.currentDuration + dt
+	return true
 end
 
-function meta:pause()
-	self.paused = true
+function timer:repeatTimer()
+      local ct = timer.currentDuration
+      -- continue off from where the timer ended so there isn't a huge gap on first tick
+      timer.currentDuration = ct - timer.duration 
 end
 
-function meta:start()
-	self.paused = false
-end
+function timer.unitTest()
+	local numFinished = 0
 
-function meta:reset()
-	self.startValue = self.originalValues.startValue
-	self.endValue = self.originalValues.endValue
-	self.easingFunction = self.originalValues.easingFunction
-	self.currentTime = 0
-	self._lastTime = nil
-	self.active = true
-	self._hasReversed = false
-	self._remainingDelay = self.delay
-	self.value = self.startValue
-	self._calledOnRepeat = nil
-end
+	local normalTimer
+	local discardOnCompletionTimer
+	local performAfterDelayTimer
+	local timerToReset
+	local timerToPause
+	local timerOtherNew
 
-function meta:remove()
-  self.active = false
-	table.insert(timersToRemove, self)
+	-- Test adding. Finishes 1st
+	normalTimer = playdate.timer.new(100, function ()
+		numFinished = numFinished + 1
+
+		timerToPause:pause()
+
+		@@ASSERT(numFinished == 1, "[ERR] playdate.timer.unitTest failed to finish at the correct time")
+		@@ASSERT(#timers == 6, "[ERR] playdate.timer.unitTest timer callback timers were not removed correctly")
+	end)
+	@@ASSERT(normalTimer ~= nil, "[ERR] playdate.timer.unitTest failed to add timer \"timer\"")
+
+	-- Test discardOnCompletion. Finishes 2nd
+	discardOnCompletionTimer = playdate.timer.new(400, function ()
+		numFinished = numFinished + 1
+
+		timerToReset:reset()
+		@@ASSERT(not timerToReset._hasReversed, "[ERR] playdate.timer.unitTest to failed to reset _hasReversed")
+		@@ASSERT(timerToReset._remainingDelay == timerToReset.delay, "[ERR] playdate.timer.unitTest to failed to reset _remainingDelay")
+		@@ASSERT(timerToReset.active, "[ERR] playdate.timer.unitTest to failed to reset active")
+		@@ASSERT(timerToReset.startValue == timerToReset.originalValues.startValue, "[ERR] playdate.timer.unitTest to failed to reset startValue")
+		@@ASSERT(timerToReset.endValue == timerToReset.originalValues.endValue, "[ERR] playdate.timer.unitTest to failed to reset endValue")
+		@@ASSERT(timerToReset.easingFunction == timerToReset.originalValues.easingFunction, "[ERR] playdate.timer.unitTest to failed to reset easingFunction")
+		@@ASSERT(timerToReset.currentDuration == 0, "[ERR] playdate.timer.unitTest to failed to reset currentDuration")
+		@@ASSERT(timerToReset.value == timerToReset.startValue, "[ERR] playdate.timer.unitTest to failed to reset value")
+		@@ASSERT(timerToReset._calledOnRepeat == nil, "[ERR] playdate.timer.unitTest to failed to reset value")
+		
+		@@ASSERT(numFinished == 2, "[ERR] playdate.timer.unitTest timers failed to finish in the correct order")
+		@@ASSERT(#timers == 5, "[ERR] playdate.timer.unitTest discardOnCompletionTimer callback timers were not removed correctly")
+  	end)
+	discardOnCompletionTimer.discardOnCompletion = false
+	@@ASSERT(discardOnCompletionTimer ~= nil, "[ERR] playdate.timer.unitTest failed to add timer \"discardOnCompletionTimer\"")
+
+	-- Test perform after delay. Finished 3th
+	performAfterDelayTimer = playdate.timer.performAfterDelay(500, function ()
+		numFinished = numFinished + 1
+
+		@@ASSERT(numFinished == 3, "[ERR] playdate.timer.unitTest timers failed to finish in the correct order")
+		@@ASSERT(#timers == 5, "[ERR] playdate.timer.unitTest performAfterDelayTimer callback timers were not removed correctly")
+  	end)
+	@@ASSERT(performAfterDelayTimer ~= nil, "[ERR] playdate.timer.unitTest failed to add timer \"performAfterDelayTimer\"")
+		
+	local runningDuration = 0
+	local duration = 600
+
+	-- Test pausing. Finishes 4th
+	timerOtherNew = playdate.timer.new(duration, 0, duration, playdate.easingFunctions.linear)
+	@@ASSERT(timerOtherNew ~= nil, "[ERR] playdate.timer.unitTest failed to add timer \"timerOtherNew\"")
+
+	timerOtherNew.updateCallback = function (timer)
+        runningDuration = runningDuration + love.timer.getDelta() * 1000
+		@@ASSERT(tostring(timer.value) == tostring(runningDuration), "[ERR] playdate.timer.unitTest timer \"timerOtherNew\" reporting incorrect timer.value")
+    end
+	
+    timerOtherNew.timerEndedCallback = function ()
+		numFinished = numFinished + 1
+
+		@@ASSERT(timerOtherNew.value == timerOtherNew.endValue, "[ERR] playdate.timer.unitTest timer value is not correct in the timerEndedCallback")
+		@@ASSERT(numFinished == 4, "[ERR] playdate.timer.unitTest timers failed to finish in the correct order")
+		@@ASSERT(#timers == 4, "[ERR] playdate.timer.unitTest timerToPause callback timers were not removed correctly")
+    end
+
+	-- Test reseting. Finishes 5th
+	timerToReset = playdate.timer.new(500, function ()
+		numFinished = numFinished + 1
+
+		timerToPause:start()
+
+		-- This is the last timer to trigger the timer ended callback
+		@@ASSERT(numFinished == 5, "[ERR] playdate.timer.unitTest timers failed to finish in the correct order")
+		@@ASSERT(#timers == 3, "[ERR] playdate.timer.unitTest timerToReset callback timers were not removed correctly")
+	  end)
+	@@ASSERT(timerToReset ~= nil, "[ERR] playdate.timer.unitTest failed to add timer \"timerToReset\"")
+
+	-- Test pausing. Finishes 6th
+	timerToPause = playdate.timer.new(700, function ()
+		numFinished = numFinished + 1
+
+		@@ASSERT(numFinished == 6, "[ERR] playdate.timer.unitTest timers failed to finish in the correct order")
+		@@ASSERT(#timers == 2, "[ERR] playdate.timer.unitTest timerToPause callback timers were not removed correctly")
+
+		-- Clean up the discardOnCompletionTimer to make sure it gets removed
+		discardOnCompletionTimer:remove()
+
+		-- timerToPause should get added to the list of frame timers to remove then cleaned up as well
+		playdate.timer.new(2, function ()
+			numFinished = numFinished + 1
+
+			@@ASSERT(numFinished == 7, "[ERR] playdate.timer.unitTest timers failed to finish in the correct order")
+			@@ASSERT(#timers == 1, "[ERR] playdate.timer.unitTest timerToPause callback clean up timers were not removed correctly")
+	  	end)
+	  end)
+	@@ASSERT(timerToPause ~= nil, "[ERR] playdate.timer.unitTest failed to add timer \"timerToPause\"")
 end
