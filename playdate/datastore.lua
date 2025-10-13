@@ -10,7 +10,9 @@ function module.write(table, filename, prettyPrint)
   filename = filename..".json"
   prettyPrint = prettyPrint or false
   -- TODO: json lib doesn't support pretty printing
-  @@ASSERT(not prettyPrint, "[ERR] prettyPrint parameter is not yet implemented.")
+  if prettyPrint then
+    print("[WARN] datastore.write() prettyPrint parameter is not yet implemented.")
+  end
   local str = jsonParser.encode(table)
   love.filesystem.write(filename, str)
 end

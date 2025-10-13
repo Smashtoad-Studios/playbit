@@ -2,6 +2,8 @@ local module = {}
 playdate = module
 
 require("playbit.geometry")
+-- TODO-Playbit: Where should this import go?
+require("playdate.geometry")
 require("playdate.metadata")
 require("playdate.sound")
 require("playdate.file")

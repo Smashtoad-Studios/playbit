@@ -2,22 +2,26 @@
 
 local module = {}
 playdate.graphics.nineSlice = module
+module.meta = {}
+module.meta.__index = module.meta
 
-module.innerX = nil
-module.innerY = nil
-
+-- TODO-Playbit: Need to implement nineSlice
 function module.new(imagePath, innerX, innerY, innerWidth, innerHeight)
-  error("[ERR] playdate.graphics.nineSlice.new() is not yet implemented.")
+  print("[ERR] playdate.graphics.nineSlice.new() is not yet implemented.")
+  local nineSlice = setmetatable({}, module.meta)
+  return nineSlice
 end
 
-function module:getSize()
-  error("[ERR] playdate.graphics.nineSlice:getSize() is not yet implemented.")
+function module.meta:getSize()
+  print("[ERR] playdate.graphics.nineSlice:getSize() is not yet implemented.")
+  return 0
 end
 
-function module:getMinSize()
-  error("[ERR] playdate.graphics.nineSlice:getMinSize() is not yet implemented.")
+function module.meta:getMinSize()
+  print("[ERR] playdate.graphics.nineSlice:getMinSize() is not yet implemented.")
+  return 0
 end
 
-function module:drawInRect(...)
-  error("[ERR] playdate.graphics.nineSlice:drawInRect() is not yet implemented.")
+function module.meta:drawInRect(...)
+  print("[ERR] playdate.graphics.nineSlice:drawInRect() is not yet implemented.")
 end

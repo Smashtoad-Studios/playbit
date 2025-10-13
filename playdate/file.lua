@@ -109,7 +109,7 @@ function meta:tell()
 end
 
 function module.exists(path)
-  error("[ERR] playdate.file.exists() is not yet implemented.")
+  return love.filesystem.getInfo(path) ~= nil
 end
 
 function module.isdir(path)

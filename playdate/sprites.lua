@@ -68,6 +68,10 @@ function meta:getImage()
     return self.image
 end
 
+function meta:setImageDrawMode(mode)
+    print("[WARN] playdate.graphics.sprite:setImageDrawMode() is not implemented.")
+end
+
 function meta:setSize(w, h)
     self.width, self.height = w, h
 end

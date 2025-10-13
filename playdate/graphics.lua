@@ -125,7 +125,8 @@ function module.setImageDrawMode(mode)
   elseif mode == module.kDrawModeWhiteTransparent or mode == "whiteTransparent" then
     playbit.graphics.shader:send("mode", 4)
   else
-    error("[ERR] Draw mode '"..mode.."' is not yet implemented.")
+    playbit.graphics.shader:send("mode", 0)
+    print("[WARN] Draw mode '"..mode.."' is not yet implemented.")
   end
 end
 
@@ -145,6 +146,32 @@ function module.fillCircleAtPoint(x, y, radius)
   playbit.graphics.updateContext()
 
   module.setImageDrawMode(playbit.graphics.drawMode)
+end
+
+function module.fillCircleInRect(xOrRect, y, width, height)
+  if y == nil then
+    -- We should only have a rect
+    -- TODO-Playbit: Implement fillCircleInRect for a rect param
+    error("playdate.graphics.fillCircleInRect() is not implemented for rect parameter")
+  else
+    local centerX = math.floor(xOrRect + width / 2)
+    local centerY = math.floor(y + height / 2)
+    local radius = math.floor(math.min(width, height) / 2)
+    module.fillCircleAtPoint(centerX, centerY, radius)
+  end
+end
+
+function module.drawCircleInRect(xOrRect, y, width, height)
+  if y == nil then
+    -- We should only have a rect
+    -- TODO-Playbit: Implement drawCircleInRect for a rect param
+    error("playdate.graphics.drawCircleInRect() is not implemented for rect parameter")
+  else
+    local centerX = math.floor(xOrRect + width / 2)
+    local centerY = math.floor(y + height / 2)
+    local radius = math.floor(math.min(width, height) / 2)
+    module.drawCircleAtPoint(centerX, centerY, radius)
+  end
 end
 
 function module.setLineWidth(width)
@@ -171,24 +198,39 @@ end
 
 function module.drawRoundRect(x, y, width, height, radius)
   -- TODO: love's rectangle function doesn't draw the same way as Playdate's
-  -- playbit.graphics.shader:send("mode", 8)
+  -- TODO-Playbit: Figure out what is different here
+  print("[WARN] playdate.graphics.drawRoundRect() does not draw exactly the same as on Playdate.")
+  playbit.graphics.shader:send("mode", 8)
 
-  -- love.graphics.rectangle("line", x, y, width, height, radius, radius, 0)
-  -- playbit.graphics.updateContext()
+  love.graphics.rectangle("line", x, y, width, height, radius, radius)
+  playbit.graphics.updateContext()
 
-  -- module.setImageDrawMode(playbit.graphics.drawMode)
-  error("[ERR] playdate.graphics.drawRoundRect() is not yet implemented.")
+  module.setImageDrawMode(playbit.graphics.drawMode)
 end
 
 function module.fillRoundRect(x, y, width, height, radius)
   -- TODO: love's rectangle function doesn't draw the same way as Playdate's
-  -- playbit.graphics.shader:send("mode", 8)
+  -- TODO-Playbit: Figure out what is different here
+  print("[WARN] playdate.graphics.fillRoundRect() does not draw exactly the same as on Playdate.")
+  playbit.graphics.shader:send("mode", 8)
 
-  -- love.graphics.rectangle("fill", x, y, width, height, radius, radius, 0)
-  -- playbit.graphics.updateContext()
+  love.graphics.rectangle("fill", x, y, width, height, radius, radius)
+  playbit.graphics.updateContext()
 
-  -- module.setImageDrawMode(playbit.graphics.drawMode)
-  error("[ERR] playdate.graphics.fillRoundRect() is not yet implemented.")
+  module.setImageDrawMode(playbit.graphics.drawMode)
+end
+
+function module.fillEllipseInRect(xOrRect, y, width, height, startAngle, endAngle)
+  -- TODO-Playbit: support all params
+  if startAngle or endAngle then
+    print("[WARN] playdate.graphics.fillEllipseInRect() does not support start or end angle.")
+  end
+  local radiusX = math.floor(width / 2)
+  local radiusY = math.floor(height / 2)
+  local centerX = xOrRect + radiusX
+  local centerY = y + radiusY
+  love.graphics.ellipse("fill", centerX, centerY, radiusX, radiusY)
+  print("[WARN] playdate.graphics.fillEllipseInRect() does not draw exactly the same as on Playdate.")
 end
 
 function module.drawLine(x1, y1, x2, y2)
@@ -337,4 +379,8 @@ function module.popContext()
     local activeContext = playbit.graphics.contextStack[#playbit.graphics.contextStack]
     love.graphics.setCanvas(activeContext._canvas)
   end
+end
+
+function module.setDitherPattern()
+  print("[ERR] playdate.graphics.setDitherPattern() is not yet implemented.")
 end

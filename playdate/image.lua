@@ -8,8 +8,13 @@ meta.__index = meta
 module.__index = meta
 
 function module.new(widthOrPath, height, bgcolor)
-  @@ASSERT(bgcolor == nil, "[ERR] Parameter bgcolor is not yet implemented.")
+  if bgcolor then
+    print("[WARN] playdate.graphics.image.new() parameter bgcolor is not yet implemented.")
+  end
+  -- @@ASSERT(bgcolor == nil, "[ERR] Parameter bgcolor is not yet implemented.")
   local img = setmetatable({}, meta)
+
+  
 
   if height then
     -- creating empty image with dimensions
@@ -17,7 +22,16 @@ function module.new(widthOrPath, height, bgcolor)
     img.data = love.graphics.newImage(imageData)  
   else
     -- creating image from file
-    img.data = love.graphics.newImage(widthOrPath..".png")  
+    local fileExtLoc, _ = string.find(widthOrPath, "%.png")
+    if not fileExtLoc then
+      widthOrPath = widthOrPath..".png"
+    end
+    img.data = love.graphics.newImage(widthOrPath)  
+  end
+
+  if img.data ~= nil then
+    img.width = img.data:getWidth()
+    img.height = img.data:getHeight()
   end
 
   return img
@@ -83,7 +97,10 @@ function meta:drawAnchored(x, y, ax, ay, flip)
 end
 
 function meta:drawCentered(x, y, flip)
-  error("[ERR] playdate.graphics.image:drawCentered() is not yet implemented.")
+  print("[WARN] playdate.graphics.image:drawCentered() may not be exactly the same.")
+  local posX = x + math.floor(self.width / 2)
+  local posY = y + math.floor(self.height / 2)
+  self:draw(posX, posY, flip)
 end
 
 function meta:clear(color)

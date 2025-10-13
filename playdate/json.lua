@@ -16,14 +16,14 @@ function module.decodeFile(path)
 end
 
 function module.encode(table)
-  error("[ERR] json.encode() is not yet implemented.")
+  print("[ERR] json.encode() is not yet implemented.")
 end
 
 function module.encodePretty(table)
-  error("[ERR] json.encodePretty() is not yet implemented.")
+  print("[ERR] json.encodePretty() is not yet implemented.")
 end
 
 -- TODO: handle overloaded signature (file, pretty, table) - where `file` is a playdate.file.file
 function module.encodeToFile(path, pretty, table)
-  error("[ERR] json.encodeToFile() is not yet implemented.")
+  print("[ERR] json.encodeToFile() is not yet implemented.")
 end
