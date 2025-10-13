@@ -30,18 +30,64 @@ function module.new(path, cellsWide, cellsSize)
   pattern = string.gsub(pattern, "%-", "%%%-")
   -- TODO: escape other magic chars?
 
-  -- TODO: support about a sequence of files (image1.png, image2.png, etc)
-  local actualFilename = ""
+  -- TODO-Playbit: name matching apparently should be case insensitive, because we had a file that wasn't capitalized correctly, and it still worked on Playdate
+  local actualFilenames = {}
   local files = love.filesystem.getDirectoryItems(folder)
   for i = 1, #files, 1 do
     local f = files[i]
     local s, e = string.find(f, pattern)
     if s and e then
       -- file found, remove extension
-      actualFilename = string.sub(f, 1, #f - 4)
-      break
+      -- actualFilename = string.sub(f, 1, #f - 4)
+      actualFilenames[#actualFilenames + 1] = string.sub(f, 1, #f - 4)
     end
   end
+
+  if #actualFilenames == 0 then
+    return nil, "No files found"
+  end
+
+  local images = {}
+
+  local dimensions = string.match(actualFilenames[1], "%-(%d+)%-(%d+)")
+
+  if #actualFilenames > 1 or not dimensions then
+    -- TODO-Playbit: Move different modes to different functions
+
+    local maxWidth = 0
+    local maxHeight = 0
+
+    for i = 1, #actualFilenames, 1 do
+      local actualPath = folder.."/"..actualFilenames[i]
+      local img = love.image.newImageData(actualPath..".png")
+      local w = img:getWidth()
+      local h = img:getHeight()
+      if w > maxWidth then
+        maxWidth = w
+      end
+      if h > maxHeight then
+        maxHeight = h
+      end
+      images[#images + 1] = img
+    end
+
+    -- TODO-Playbit: is this the right way to calculate frame width/height?
+    local frameWidth = maxWidth
+    local frameHeight = maxHeight
+
+    imagetable.length = #images
+    imagetable._images = images
+    imagetable._width = #images * frameWidth
+    imagetable._height = frameHeight
+    imagetable._rows = 1
+    imagetable._columns = #images
+    imagetable._frameWidth = frameWidth
+    imagetable._frameHeight = frameHeight
+
+    return imagetable
+  end
+
+  local actualFilename = actualFilenames[1]
 
   -- parse frame width and height out of filename
   local matches = string.gmatch(actualFilename, "%-(%d+)")
@@ -58,7 +104,6 @@ function module.new(path, cellsWide, cellsSize)
   local rows = h / frameHeight
   local columns = w / frameWidth
 
-  local images = {}
   for r = 0, rows - 1, 1 do
     for c = 0, columns - 1, 1 do
       
