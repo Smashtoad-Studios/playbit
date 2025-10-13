@@ -77,6 +77,20 @@ function module.waveProcessor(input, output, options)
   io.popen(command, "w")
 end
 
+function module.waveUnprocessor(input, output, options)
+  fs.createFolderIfNeeded(output)
+
+  local ffmpegPath = "ffmpeg"
+  if options then
+    if options.path then
+      ffmpegPath = "\""..fs.sanitizePath(options.path).."\""
+    end
+  end
+
+  local command = ffmpegPath.." -loglevel error -i \""..input.."\" -ar 44100 -acodec pcm_s32le \""..output.."\""
+  io.popen(command, "w")
+end
+
 function module.defaultProcessor(input, output, options)
   local inputFile = io.open(input, "rb")
   local contents = inputFile:read("a")
