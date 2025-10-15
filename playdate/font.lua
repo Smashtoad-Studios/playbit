@@ -112,6 +112,8 @@ end
 function meta:_drawTextInRect(text, x, y, width, height, leadingAdjustment, truncationString, textAlignment)
   y = y - 1
   
+  leadingAdjustment = leadingAdjustment or 0
+
   local lineHeight = self:getHeight() + self:getLeading() + leadingAdjustment
   
   if lineHeight > height then

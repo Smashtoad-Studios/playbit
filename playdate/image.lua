@@ -207,7 +207,36 @@ end
 
 -- TODO: handle overloaded signature (rect, flip)
 function meta:drawTiled(x, y, width, height, flip)
-  error("[ERR] playdate.graphics.image:drawTiled() is not yet implemented.")
+  -- always render pure white so its not tinted
+  local r, g, b = love.graphics.getColor()
+  love.graphics.setColor(1, 1, 1, 1)
+
+  local scaleX = 1
+  local scaleY = 1
+  if flip then
+    local w = self.data:getWidth()
+    local h = self.data:getHeight()
+    if flip == playdate.graphics.kImageFlippedX then
+      scaleX = -1
+      x = x + w
+    elseif flip == playdate.graphics.kImageFlippedY then
+      scaleY = -1
+      y = y + h
+    elseif flip == playdate.graphics.kImageFlippedXY then
+      scaleX = -1
+      scaleY = -1
+      x = x + w
+      y = y + h
+    end
+  end
+  
+  self.data:setWrap("repeat", "repeat")
+  playbit.graphics.quad:setViewport(x, y, width, height, w, h)
+  love.graphics.draw(self.data, playbit.graphics.quad, x, y, scaleX, scaleY)
+
+  love.graphics.setColor(r, g, b, 1)
+  playbit.graphics.updateContext()
+  print("[WARN] playdate.graphics.image:drawTiled() needs to be tested.")
 end
 
 function meta:drawBlurred(x, y, radius, numPasses, ditherType, flip, xPhase, yPhase)

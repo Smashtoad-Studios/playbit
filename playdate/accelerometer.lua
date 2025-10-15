@@ -1,19 +1,25 @@
 -- docs: https://sdk.play.date/2.6.2/Inside%20Playdate.html#accelerometer
 
+local running = false
+
 playdate.startAccelerometer = playdate.startAccelerometer or function()
-    error("[ERR] playdate.startAccelerometer() is not yet implemented.")
+    running = true
+    print("[ERR] playdate.startAccelerometer() is not yet implemented.")
 end
 
 playdate.stopAccelerometer = playdate.stopAccelerometer or function()
-    error("[ERR] playdate.stopAccelerometer() is not yet implemented.")
+    running = false
+    print("[ERR] playdate.stopAccelerometer() is not yet implemented.")
 end
 
 playdate.readAccelerometer = playdate.readAccelerometer or function()
-    error("[ERR] playdate.readAccelerometer() is not yet implemented.")
+    print("[WARN] playdate.readAccelerometer() is not yet implemented.")
+    return 0,1,0 --upright
 end
 
-playdate.accelerometerIsRunning = playdate.readAccelerometer or function()
-    error("[ERR] playdate.accelerometerIsRunning() is not yet implemented.")
+playdate.accelerometerIsRunning = playdate.accelerometerIsRunning or function()
+    -- print("[ERR] playdate.accelerometerIsRunning() is not yet implemented.")
+    return running
 end
 
 -- undocumented functions (not in the public SDK documentation)

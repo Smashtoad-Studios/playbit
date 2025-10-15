@@ -119,6 +119,11 @@ function meta:getZIndex()
     return self.zIndex
 end
 
+function meta:setStencilImage(stencil)
+    print("[WARN] playdate.graphics.sprite:setStencilImage() is not yet implemented.")
+end
+
+
 function meta:setCollideRect(x, y, w, h)
     self.collideRect = { x = x, y = y, width = w, height = h }
 end
@@ -455,8 +460,8 @@ function meta:draw()
     end
 end
 
-
-function module.update()
+-- TODO-Playbit: This needs to be named update()
+function module.updateAll()
     for _, spr in ipairs(allSprites) do
         if spr.animator then
             local p = spr.animator:currentValue()
@@ -473,6 +478,20 @@ end
 function module.drawAll()
     for _, spr in ipairs(allSprites) do
         spr:draw()
+    end
+end
+
+function module.removeAll()
+    for _, spr in ipairs(allSprites) do
+        spr.added = false
+    end
+    allSprites = {}
+end
+
+function module.removeSprites(spritesToRemove)
+    for _, spr in ipairs(spritesToRemove) do
+        -- TODO-Playbit: is there a better way to do this that won't loop through the allSprites list for each sprite?
+        spr:remove()
     end
 end
 

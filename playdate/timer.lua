@@ -8,11 +8,11 @@ local timers = {}
 local timersToRemove = {}
 
 ---Creates and automatically starts a new timer. Timers are stored as contiguous arrays for faster updates.
----@param duration Number of frames the timer should run. 
-function timer.new(numberOfFrames, ...)
-	@@ASSERT(type(numberOfFrames) == "number", "[ERR] playdate.timer.new numberOfFrames is not passed in or is a not number")
-	
-	local timer = timer(numberOfFrames, ...)
+---@param duration Number of milliseconds the timer should run. 
+function timer.new(duration, ...)
+	@@ASSERT(type(duration) == "number", "[ERR] playdate.timer.new duration is not passed in or is a not number")
+
+	local timer = timer(duration, ...)
 	table.insert(timers, timer)
 
 	return timer

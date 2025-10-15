@@ -264,6 +264,15 @@ function module.drawArc(x, y, radius, startAngle, endAngle)
   module.setImageDrawMode(playbit.graphics.drawMode)
 end
 
+function module.fillTriangle(x1, y1, x2, y2, x3, y3)
+  playbit.graphics.shader:send("mode", 8)
+
+  love.graphics.polygon("fill", x1, y1, x2, y2, x3, y3)
+  playbit.graphics.updateContext()
+
+  module.setImageDrawMode(playbit.graphics.drawMode)
+end
+
 function module.drawPixel(x, y)
   playbit.graphics.shader:send("mode", 8)
 

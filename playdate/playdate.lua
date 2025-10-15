@@ -12,6 +12,7 @@ require("playdate.accelerometer")
 require("playdate.json")
 require("playdate.easing")
 require("playdate.inputHandlers")
+require("playdate.display")
 
 -- ████████╗██╗███╗   ███╗███████╗
 -- ╚══██╔══╝██║████╗ ████║██╔════╝
@@ -174,6 +175,10 @@ function module.getCrankPosition()
     return degrees + 360
   end
   return degrees
+end
+
+function module.setCrankSoundsDisabled(disable)
+  print("[WARN] playdate.setCrankSoundsDisabled() has no effect.")
 end
 
 function love.joystickadded(joystick)
