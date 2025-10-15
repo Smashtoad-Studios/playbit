@@ -67,7 +67,7 @@ function classTemp.extends(parent)
   local meta = {}
   meta.__index = parent
   meta.__call = function (self, ...)
-    local instance = subclass.new()
+    local instance = subclass.baseObject()
     setmetatable(instance, subclass)
     instance.super = subclass
     subclass.init(instance, ...)

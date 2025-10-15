@@ -49,6 +49,10 @@ function module.new(imageOrTilemap)
     return sprite
 end
 
+function module.baseObject()
+    return module.new()
+end
+
 function module.performOnallSprites(func)
     for i = 1, #allSprites do
         func(allSprites[i])
