@@ -12,39 +12,38 @@ playdate.graphics.sprite = module
 local meta = {}
 meta.__index = meta
 module.__index = meta
-
+--[[
+    TODO-Playbit: Not quite sure yet why this makes it work... but it does. It seems to
+    be something with the metatable for "module" and the instance both getting overwritten
+    in the object.lua when we extend from sprite, but I don't quite understand how this fixes it.
+]]--
+setmetatable(module, meta)
 
 local allSprites = {}
+
+function meta:init(imageOrTilemap)
+    -- TODO-Playbit: Support timemaps
+    if imageOrTilemap then
+        self:setImage(imageOrTilemap)
+    end
+    self:moveTo(0, 0)
+end
 
 function module.new(imageOrTilemap)
     local sprite = setmetatable({}, meta)
 
-    local hasSpr = sprite == nil and 'no sprite' or 'has sprite'
-
-    print("sprite " .. hasSpr)
-    -- printTable(sprite)
-
-    local hasImg = imageOrTilemap == nil and 'no image' or 'has image'
-
-    
-    print("imageOrTilemap " .. hasImg)
-    -- printTable(imageOrTilemap)
-
-    if imageOrTilemap then
-        sprite:setImage(imageOrTilemap)
-    end
-
-    sprite.x, sprite.y = 0, 0
     sprite.visible = true
     sprite.zIndex = 0
     sprite.collideRect = nil
     sprite.animator = nil
 
     sprite:setCenter(0.5, 0.5)
-
     sprite:resetGroupMask()
     sprite:resetCollidesWithGroupsMask()
 
+    sprite:init(imageOrTilemap)
+
+    -- TODO-Playbit: Playdate does kinda do this... but they don't automatically draw, so it's slightly different
     -- table.insert(allSprites, sprite)
     return sprite
 end
@@ -412,31 +411,35 @@ function meta:getCenterPoint()
     return self.x - self.width * self.centerX, self.y - self.height * self.centerY
 end
 
+function meta:update()
+    -- TODO-Playbit: What does a regular sprite do in its update? Anything?
+end
+
 function meta:draw()
     if self.visible and self.image then
+        self.image:draw(self:getCenterPoint())
 
-        -- if self.scaleX then
-        --     self.image:drawScaled(self.x, self.y, self.scaleX, self.scaleY)
-        -- elseif self.angle then
-        --     self.image:drawRotated(self.x, self.y, self.angle)
-        -- else
-        --     self.image:draw(self.x, self.y)
-        -- end
-        local r, g, b = love.graphics.getColor()
-        love.graphics.setColor(1, 1, 1, 1)
+        -- -- if self.scaleX then
+        -- --     self.image:drawScaled(self.x, self.y, self.scaleX, self.scaleY)
+        -- -- elseif self.angle then
+        -- --     self.image:drawRotated(self.x, self.y, self.angle)
+        -- -- else
+        -- --     self.image:draw(self.x, self.y)
+        -- -- end
+        -- local r, g, b = love.graphics.getColor()
+        -- love.graphics.setColor(1, 1, 1, 1)
         
-        -- love.graphics.push()
-            love.graphics.draw(self.image.data,
-                self.x, self.y,
-                self.angle,
-                self.scaleX, self.scaleY,
-                self.width * self.centerX, self.height * self.centerY
-            )
-        -- love.graphics.pop()        
+        -- -- love.graphics.push()
+        --     love.graphics.draw(self.image.data,
+        --         self.x, self.y,
+        --         self.angle,
+        --         self.scaleX, self.scaleY,
+        --         self.width * self.centerX, self.height * self.centerY
+        --     )
+        -- -- love.graphics.pop()        
 
-        love.graphics.setColor(r, g, b, 1)        
-        playdate.graphics._updateContext()
-
+        -- love.graphics.setColor(r, g, b, 1)        
+        -- playbit.graphics.updateContext()
     end
 end
 
@@ -450,6 +453,8 @@ function module.update()
                 spr.animator = nil
             end
         end
+        spr:update()
+        spr:draw()
     end
 end
 

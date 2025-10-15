@@ -6,6 +6,10 @@ Object.__index = Object
 function Object:init(...)
 end
 
+function Object.new()
+  return {}
+end
+
 function Object.baseObject()
   return {}
 end
@@ -63,7 +67,7 @@ function classTemp.extends(parent)
   local meta = {}
   meta.__index = parent
   meta.__call = function (self, ...)
-    local instance = subclass.baseObject()
+    local instance = subclass.new()
     setmetatable(instance, subclass)
     instance.super = subclass
     subclass.init(instance, ...)
