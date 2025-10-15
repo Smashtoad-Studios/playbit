@@ -11,7 +11,6 @@ require("playdate.datastore")
 require("playdate.accelerometer")
 require("playdate.json")
 require("playdate.easing")
-require("playdate.inputHandlers")
 require("playdate.display")
 
 -- ████████╗██╗███╗   ███╗███████╗
@@ -72,13 +71,37 @@ local isCrankDocked = false
 local crankPos = 0
 local lastCrankPos = 0
 
+local inputHandlerStack = {}
+
+local inputHandlersModule = {}
+playdate.inputHandlers = inputHandlersModule
+
+function inputHandlersModule.push(handler, maskPreviousHandlers)
+    inputHandlerStack[#inputHandlerStack + 1] = {handler = handler, maskPreviousHandlers = maskPreviousHandlers}
+end
+
+function inputHandlersModule.pop()
+    return table.remove(inputHandlerStack, #inputHandlerStack)
+end
+
+local function processButtonInput(key, buttonState)
+  -- TODO-Playbit: check down the stack of input handlers
+  local currentInputHandler = inputHandlerStack[#inputHandlerStack]
+  if currentInputHandler then
+    local buttonFuncName = module._keyToButtonFuncName["kb_"..key] .. buttonState
+    if currentInputHandler.handler[buttonFuncName] then
+      currentInputHandler.handler[buttonFuncName]()
+    end
+  end
+end
+
 module._buttonToKey = {
-  up = "kb_up",
-  down = "kb_down",
-  left = "kb_left",
-  right = "kb_right",
-  a = "kb_s",
-  b = "kb_a",
+  up = "kb_w",
+  down = "kb_s",
+  left = "kb_a",
+  right = "kb_d",
+  a = "kb_.",
+  b = "kb_,",
 }
 
 module.kButtonA = "a"
@@ -87,6 +110,22 @@ module.kButtonUp = "up"
 module.kButtonDown = "down"
 module.kButtonLeft = "left"
 module.kButtonRight = "right"
+
+module._keyToButtonFuncName = {
+  [module._buttonToKey.up] = "upButton",
+  [module._buttonToKey.down] = "downButton",
+  [module._buttonToKey.left] = "leftButton",
+  [module._buttonToKey.right] = "rightButton",
+  [module._buttonToKey.a] = "AButton",
+  [module._buttonToKey.b] = "BButton",
+}
+
+module._buttonStates =
+{
+  down = "Down",
+  up = "Up",
+  held = "Up",
+}
 
 local NONE = 0
 local JUST_PRESSED = 1
@@ -295,6 +334,8 @@ function love.keypressed(key)
       playdate.keyPressed(key)
     end
   end
+
+  processButtonInput(key, module._buttonStates.down)
 end
 
 function love.keyreleased(key)  
@@ -309,6 +350,8 @@ function love.keyreleased(key)
       playdate.keyReleased(key)
     end
   end
+
+  processButtonInput(key, module._buttonStates.up)
 end
 
 function module.updateInput()
