@@ -11,6 +11,7 @@ require("playdate.datastore")
 require("playdate.accelerometer")
 require("playdate.json")
 require("playdate.easing")
+require("playdate.inputHandlers")
 
 -- ████████╗██╗███╗   ███╗███████╗
 -- ╚══██╔══╝██║████╗ ████║██╔════╝

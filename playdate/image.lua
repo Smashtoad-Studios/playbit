@@ -7,26 +7,28 @@ local meta = {}
 meta.__index = meta
 module.__index = meta
 
-function module.new(widthOrPath, height, bgcolor)
-  if bgcolor then
-    print("[WARN] playdate.graphics.image.new() parameter bgcolor is not yet implemented.")
-  end
+function module.new(widthOrPath, height, bgColor)
   -- @@ASSERT(bgcolor == nil, "[ERR] Parameter bgcolor is not yet implemented.")
   local img = setmetatable({}, meta)
-
   
+  if bgColor then
+    print("[WARN] playdate.graphics.image.new() parameter bgcolor is not yet implemented.")
+  end
+  img.bgColor = bgColor
 
   if height then
     -- creating empty image with dimensions
     local imageData = love.image.newImageData(widthOrPath, height)
-    img.data = love.graphics.newImage(imageData)  
+    img.imgData = imageData
+    img.data = love.graphics.newImage(imageData)
   else
     -- creating image from file
     local fileExtLoc, _ = string.find(widthOrPath, "%.png")
     if not fileExtLoc then
       widthOrPath = widthOrPath..".png"
     end
-    img.data = love.graphics.newImage(widthOrPath)  
+    img.imgData = love.image.newImageData(widthOrPath, height)
+    img.data = love.graphics.newImage(widthOrPath)
   end
 
   if img.data ~= nil then
@@ -42,7 +44,11 @@ function meta:load(path)
 end
 
 function meta:copy()
-  error("[ERR] playdate.graphics.image:copy() is not yet implemented.")
+  local newImg = module.new(self.width, self.height, self.bgColor)
+  --TODO-Playbit: May be a better way to create a copy than this
+  newImg.data = love.graphics.newImage(self.imgData)
+  --TODO-Playbit: May need to copy over masks, etc. once those are implemented.
+  return newImg
 end
 
 function meta:getSize()

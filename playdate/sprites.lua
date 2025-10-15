@@ -37,6 +37,7 @@ function module.new(imageOrTilemap)
     sprite.collideRect = nil
     sprite.animator = nil
 
+    sprite:setScale(1, 1)
     sprite:setCenter(0.5, 0.5)
     sprite:resetGroupMask()
     sprite:resetCollidesWithGroupsMask()
@@ -174,6 +175,17 @@ end
 
 function meta:resetCollidesWithGroupsMask()
     self.collidesWithGroupsMask = 0x00000000
+end
+
+function meta:setClipRect(xOrRect, y, width, height)
+    -- TODO-Playbit: Implement clip rect
+    print("[WARN] playdate.graphics.sprite setClipRect() does not yet have any effect.")
+end
+
+function meta:setIgnoresDrawOffset(flag)
+    -- TODO-Playbit: Implement ignore draw offset
+    print("[WARN] playdate.graphics.sprite setIgnoresDrawOffset() does not yet have any effect.")
+    self.ignoresDrawOffset = flag
 end
 
 function meta:canCollideWith(other)
