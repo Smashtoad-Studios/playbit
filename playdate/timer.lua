@@ -59,16 +59,16 @@ function timer:advanceTimer()
 		return false
 	end
 		
-	self._lastTime = self.currentDuration
+	self._lastTime = self:getCurrentDuration()
     -- update timer
-    self.currentDuration = self.currentDuration + dt
+    self:setCurrentDuration(self:getCurrentDuration() + dt)
 	return true
 end
 
 function timer:repeatTimer()
-      local ct = timer.currentDuration
+      local ct = timer:getCurrentDuration()
       -- continue off from where the timer ended so there isn't a huge gap on first tick
-      timer.currentDuration = ct - timer.duration 
+      timer:setCurrentDuration(ct - timer.duration)
 end
 
 function timer.unitTest()
@@ -103,7 +103,7 @@ function timer.unitTest()
 		@@ASSERT(timerToReset.startValue == timerToReset.originalValues.startValue, "[ERR] playdate.timer.unitTest to failed to reset startValue")
 		@@ASSERT(timerToReset.endValue == timerToReset.originalValues.endValue, "[ERR] playdate.timer.unitTest to failed to reset endValue")
 		@@ASSERT(timerToReset.easingFunction == timerToReset.originalValues.easingFunction, "[ERR] playdate.timer.unitTest to failed to reset easingFunction")
-		@@ASSERT(timerToReset.currentDuration == 0, "[ERR] playdate.timer.unitTest to failed to reset currentDuration")
+		@@ASSERT(timerToReset:getCurrentDuration() == 0, "[ERR] playdate.timer.unitTest to failed to reset currentDuration")
 		@@ASSERT(timerToReset.value == timerToReset.startValue, "[ERR] playdate.timer.unitTest to failed to reset value")
 		@@ASSERT(timerToReset._calledOnRepeat == nil, "[ERR] playdate.timer.unitTest to failed to reset value")
 		

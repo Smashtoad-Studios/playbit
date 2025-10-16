@@ -17,9 +17,9 @@ end
 ---Set the next value of this timer based on the easing
 ---@param timer The timer to update the value.
 local function updateTimerValue(timer)
-	if timer.startValue ~= timer.endValue and timer.currentDuration ~= 0 then
+	if timer.startValue ~= timer.endValue and timer:getCurrentDuration() ~= 0 then
 		timer.value = timer.easingFunction(
-			timer.currentDuration, 
+			timer:getCurrentDuration(), 
 			timer.startValue, 
 			timer.endValue - timer.startValue, 
 			timer.duration, 
@@ -51,7 +51,7 @@ function baseTimer:init(duration, ...)
 	self._remainingDelay = nil 
 	self._hasReversed = false
 
-	self.currentDuration = 0
+	self:setCurrentDuration(0)
 	self.duration = duration
 	self.active = true
 	self.delay = 0
@@ -116,7 +116,7 @@ function baseTimer.updateTimers(timers, timersToRemove)
 			goto continue
 		end
 
-		if timer.currentDuration <= timer.duration then
+		if timer:getCurrentDuration() <= timer.duration then
 			-- timer still running
 			updateTimerValue(timer)
 			updateTimer(timer)
@@ -129,7 +129,7 @@ function baseTimer.updateTimers(timers, timersToRemove)
 			local temp = timer.startValue
 			timer.startValue = timer.endValue
 			timer.endValue = temp
-			timer.currentDuration = timer.duration
+			timer:setCurrentDuration(timer.duration)			
 			timer._remainingDelay = timer.delay
 
 			if timer.reverseEasingFunction then
@@ -157,7 +157,7 @@ function baseTimer.updateTimers(timers, timersToRemove)
 		-- complete timer
 		else
 			timer.active = false
-			timer.currentDuration = 0
+			timer:setCurrentDuration(0)
 			timer.value = timer.endValue
 
 			-- when .repeats is true, then set to false, we shouldn't ever invoke the callback again
@@ -208,7 +208,7 @@ function baseTimer:remove()
 end
 
 function baseTimer:reset()
-	self.currentDuration = 0
+	self:setCurrentDuration(0)
 	self._hasReversed = false
 	self._remainingDelay = self.delay
 	self.active = true
@@ -218,6 +218,14 @@ function baseTimer:reset()
 	self.value = self.startValue
 	self._calledOnRepeat = nil
 	self._lastTime = nil
+end
+
+function baseTimer:setCurrentDuration(duration)
+	self.currentTime = duration
+end
+
+function baseTimer:getCurrentDuration(duration)
+	return self.currentTime
 end
 
 function baseTimer:advanceTimer()

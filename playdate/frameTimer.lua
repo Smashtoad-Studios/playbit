@@ -41,6 +41,14 @@ function frameTimer:remove()
 	timersToRemove[#timersToRemove + 1] = self
 end
 
+function frameTimer:setCurrentDuration(duration)
+	self.frame = duration
+end
+
+function frameTimer:getCurrentDuration(duration)
+	return self.frame
+end
+
 ---@return returns true if the timer advanced and was not delayed
 function frameTimer:advanceTimer()
 	-- start delay
@@ -57,7 +65,7 @@ function frameTimer:advanceTimer()
 		return false
 	end
 
-	self.currentDuration = self.currentDuration + 1
+	self:setCurrentDuration(self:getCurrentDuration() + 1)
 	return true
 end
 
@@ -93,7 +101,7 @@ function frameTimer.unitTest()
 		@@ASSERT(frameTimerToReset.startValue == frameTimerToReset.originalValues.startValue, "[ERR] playdate.frameTimer.unitTest to failed to reset startValue")
 		@@ASSERT(frameTimerToReset.endValue == frameTimerToReset.originalValues.endValue, "[ERR] playdate.frameTimer.unitTest to failed to reset endValue")
 		@@ASSERT(frameTimerToReset.easingFunction == frameTimerToReset.originalValues.easingFunction, "[ERR] playdate.frameTimer.unitTest to failed to reset easingFunction")
-		@@ASSERT(frameTimerToReset.currentDuration == 0, "[ERR] playdate.frameTimer.unitTest to failed to reset currentDuration")
+		@@ASSERT(frameTimerToReset:getCurrentDuration() == 0, "[ERR] playdate.frameTimer.unitTest to failed to reset currentDuration")
 		@@ASSERT(frameTimerToReset.value == frameTimerToReset.startValue, "[ERR] playdate.frameTimer.unitTest to failed to reset value")
 		@@ASSERT(frameTimerToReset._calledOnRepeat == nil, "[ERR] playdate.frameTimer.unitTest to failed to reset value")
 		
