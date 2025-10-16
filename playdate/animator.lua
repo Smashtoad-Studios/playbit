@@ -28,46 +28,49 @@ function module.new(duration, ...)
     @@ASSERT(args.n > 0, "[ERR] animator requires at least two parameters")
     
 
-    local newAnimator = setmetatable({}, module.meta)
+    local newAnimator = setmetatable({}, meta)
 
     -- TODO-Playbit: Need to parse all params
     -- this is some kind of geometry
     if type(args[1]) == "number" then
         -- there should be two number values
-        if args[2] == nil or type(args[2] ~= "number") then
+        if args[2] == nil or type(args[2]) ~= "number" then
             error("[ERR] unsupported parameters to animator.")
         end
         newAnimator.type = "number"
-        print("[ERR] animator for two number values is not implemented.")
+        print("[WARN] animator for two number values is not implemented.")
     elseif type(args[1]) == "table" then
         -- there could be a single geometry object, or a start and end point
         if args[2] == nil then
             newAnimator.type = "geometry"
-            print("[ERR] animator for geometry values besides a line segment is not implemented.")
+            print("[WARN] animator for geometry values besides a line segment is not implemented.")
         elseif type(args[2]) == "table" then
-            newAnimator.type = "points"
-            print("[ERR] animator for two point values is not implemented.")
+            newAnimator.type = "point"
+            print("[WARN] animator for two point values is not implemented.")
         end
     else
         error("[ERR] unsupported second parameter to animator.")
     end
 
-    print("[ERR] playdate.graphics.animator.new() is not yet implemented.")
+    print("[WARN] playdate.graphics.animator.new() is not yet fully implemented.")
     return newAnimator
 end
 
 function meta:currentValue()
-    error("[ERR] playdate.graphics.animator:currentValue() is not yet implemented.")
+    print("[WARN] playdate.graphics.animator:currentValue() is not yet implemented.")
+    if self.type == "number" then
+        return 0
+    else
+        return {x = 0, y = 0}
+    end
 end
 
 function meta:valueAtTime(time)
-    print("[ERR] playdate.graphics.animator:valueAtTime() is not yet implemented.")
+    print("[WARN] playdate.graphics.animator:valueAtTime() is not yet implemented.")
     if self.type == "number" then
         return 0
-    elseif self.type == "point" then
-        return {x = 0, y = 0}
     else
-        return {x1 = 0, y1 = 0, x2 = 0, y2 = 0}
+        return {x = 0, y = 0}
     end
 end
 
@@ -76,11 +79,12 @@ function meta:progress()
 end
 
 function meta:reset(duration)
-    error("[ERR] playdate.graphics.animator:reset() is not yet implemented.")
+    print("[WARN] playdate.graphics.animator:reset() is not yet implemented.")
 end
 
 function meta:ended()
-    error("[ERR] playdate.graphics.animator:ended() is not yet implemented.")
+    print("[WARN] playdate.graphics.animator:ended() is not yet implemented.")
+    return true
 end
 
 module.easingAmplitude = nil

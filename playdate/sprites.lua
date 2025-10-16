@@ -63,9 +63,21 @@ function module.spriteWithText(text, maxWidth, maxHeight, backgroundColor, leadi
 	error("spriteWithText not implemented!")
 end
 
+function meta:copy()
+    local newSprite = module.new(self.image)
+    --TODO-Playbit: copy all properties?
+    return newSprite
+end
+
 function meta:setImage(image)
     self.image = image
-    self.width, self.height = image:getSize()
+
+    if not image then
+        self:setSize(0, 0)
+    else
+        -- self:setSize(image:getSize()) -- TODO does that pass both params?
+        self.width, self.height = image:getSize()
+    end
 end
 
 function meta:getImage()
@@ -127,6 +139,23 @@ function meta:setStencilImage(stencil)
     print("[WARN] playdate.graphics.sprite:setStencilImage() is not yet implemented.")
 end
 
+function meta:clearStencil()
+    print("[WARN] playdate.graphics.sprite:clearStencil() is not yet implemented.")
+end
+
+function meta:setAnimator(animator)
+    print("Setting animator")
+    animator:currentValue()
+    self.animator = animator
+end
+
+function meta:removeAnimator(animator)
+    self.animator = nil
+end
+
+function meta:markDirty()
+    print("[WARN] playdate.graphics.sprite:markDirty() is not yet implemented.")
+end
 
 function meta:setCollideRect(x, y, w, h)
     self.collideRect = { x = x, y = y, width = w, height = h }

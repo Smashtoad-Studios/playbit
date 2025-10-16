@@ -48,6 +48,10 @@ function sampleplayer.meta:isPlaying()
   return self.data:isPlaying()
 end
 
+function sampleplayer.meta:setFinishCallback()
+  print("[WARN] playdate.sound.sampleplayer:setFinishCallback() is not yet implemented.")
+end
+
 function sampleplayer.meta:setVolume(value)
   self.data:setVolume(value)
 end
@@ -136,8 +140,97 @@ function fileplayer.meta:getLength()
   return self.data:getDuration("seconds")
 end
 
--- TODO: fileplayer
 -- TODO: synth
+-- docs: https://sdk.play.date/3.0.0/Inside%20Playdate.html#C-sound.synth
+
+local synth = {}
+playdate.sound.synth = synth
+synth.meta = {}
+synth.meta.__index = synth.meta
+
+function synth.new()
+  print("[WARN] playdate.sound.synth is not yet implemented")
+  local newSynth = setmetatable({}, synth.meta)
+  return newSynth
+end
+
+function synth.meta:playNote(pitch, volume, length, when)
+  print("[WARN] playdate.sound.synth:playNote() is not yet implemented")
+end
+
+function synth.meta:playMIDINote(note, volume, length, when)
+  print("[WARN] playdate.sound.synth:playMIDINote() is not yet implemented")
+end
+
+function synth.meta:noteOff()
+  print("[WARN] playdate.sound.synth:noteOff() is not yet implemented")
+end
+
+function synth.meta:isPlaying()
+  print("[WARN] playdate.sound.synth:isPlaying() is not yet implemented")
+end
+
+function synth.meta:setAmplitudeMod(signal)
+  print("[WARN] playdate.sound.synth:setAmplitudeMod() is not yet implemented")
+end
+
+function synth.meta:setADSR(attack, decay, sustain, release)
+  print("[WARN] playdate.sound.synth:setADSR() is not yet implemented")
+end
+
+function synth.meta:setAttack(time)
+  print("[WARN] playdate.sound.synth:setAttack() is not yet implemented")
+end
+
+function synth.meta:setDecay(time)
+  print("[WARN] playdate.sound.synth:setDecay() is not yet implemented")
+end
+
+function synth.meta:setSustain(level)
+  print("[WARN] playdate.sound.synth:setSustain() is not yet implemented")
+end
+
+function synth.meta:setRelease(time)
+  print("[WARN] playdate.sound.synth:setRelease() is not yet implemented")
+end
+
+function synth.meta:clearEnvelope()
+  print("[WARN] playdate.sound.synth:clearEnvelope() is not yet implemented")
+end
+
+function synth.meta:setEnvelopeCurvature(amount)
+  print("[WARN] playdate.sound.synth:setEnvelopeCurvature() is not yet implemented")
+end
+
+function synth.meta:getEnvelope()
+  print("[WARN] playdate.sound.synth:getEnvelope() is not yet implemented")
+end
+
+function synth.meta:setFinishCallback(callback)
+  print("[WARN] playdate.sound.synth:setFinishCallback() is not yet implemented")
+end
+
+
+function synth.meta:setFrequencyMod(signal)
+  print("[WARN] playdate.sound.synth:setFrequencyMod() is not yet implemented")
+end
+
+function synth.meta:setLegato(flag)
+  print("[WARN] playdate.sound.synth:setLegato() is not yet implemented")
+end
+
+
+function synth.meta:setVolume(left, right)
+  print("[WARN] playdate.sound.synth:setVolume() is not yet implemented")
+end
+
+function synth.meta:setWaveform(waveform)
+  print("[WARN] playdate.sound.synth:setWaveform() is not yet implemented")
+end
+
+function synth.meta:setWavetable(sample, samplesize, xsize, ysize)
+  print("[WARN] playdate.sound.synth:setWavetable() is not yet implemented")
+end
 
 -- docs: https://sdk.play.date/3.0.0/Inside%20Playdate.html#C-sound.channel 
 local channel = {}

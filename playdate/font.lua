@@ -7,6 +7,10 @@ local meta = {}
 meta.__index = meta
 module.__index = meta
 
+module.kVariantNormal = "normal"
+module.kVariantItalic = "italic"
+module.kVariantBold = "bold"
+
 -- TODO figure out correct values, if necesssary
 module.kLanguageEnglish = "English"
 module.kLanguageJapanese = "Japanese"
@@ -19,7 +23,11 @@ function module.new(path)
 end
 
 function module.newFamily(fontPaths)
-  error("[ERR] playdate.graphics.font.newFamily() is not yet implemented.")
+  local fontFamily = {}
+  for fontType, fontPath in pairs(fontPaths) do
+    fontFamily[fontType] = module.new(fontPath)
+  end
+  return fontFamily
 end
 
 function module.setFont(font, variant)
@@ -28,10 +36,6 @@ end
 
 function module.getFont(variant)
   error("[ERR] playdate.graphics.font.getFont() is not yet implemented.")
-end
-
-function module.setFontFamily(fontFamily)
-  error("[ERR] playdate.graphics.font.setFontFamily() is not yet implemented.")
 end
 
 function module.setFontTracking(pixels)

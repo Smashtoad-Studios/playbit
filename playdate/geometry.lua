@@ -37,3 +37,25 @@ function point.new(x, y)
 
   return newPoint
 end
+
+-- docs: https://sdk.play.date/3.0.0/Inside%20Playdate.html#C-geometry.arc
+
+local arc = {}
+playdate.geometry.arc = arc
+arc.meta = {}
+arc.meta.__index = arc.meta
+
+-- direction is true for clockwise
+-- playdate.geometry.arc.new(x, y, radius, startAngle, endAngle, [direction])
+function arc.new(x, y, radius, startAngle, endAngle, direction)
+  local newArc = setmetatable({}, arc.meta)
+
+  arc.x = x
+  arc.y = y
+  arc.radius = radius
+  arc.startAngle = startAngle
+  arc.endAngle = endAngle
+  arc.direction = direction
+  
+  return newArc
+end

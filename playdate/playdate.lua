@@ -88,6 +88,9 @@ local function processButtonInput(key, buttonState)
   -- TODO-Playbit: check down the stack of input handlers
   local currentInputHandler = inputHandlerStack[#inputHandlerStack]
   if currentInputHandler then
+    if not module._keyToButtonFuncName["kb_"..key] then
+      return
+    end
     local buttonFuncName = module._keyToButtonFuncName["kb_"..key] .. buttonState
     if currentInputHandler.handler[buttonFuncName] then
       currentInputHandler.handler[buttonFuncName]()
@@ -124,7 +127,7 @@ module._buttonStates =
 {
   down = "Down",
   up = "Up",
-  held = "Up",
+  held = "Held",
 }
 
 local NONE = 0

@@ -27,7 +27,7 @@ function module.new(widthOrPath, height, bgColor)
     if not fileExtLoc then
       widthOrPath = widthOrPath..".png"
     end
-    img.imgData = love.image.newImageData(widthOrPath, height)
+    img.imgData = love.image.newImageData(widthOrPath)
     img.data = love.graphics.newImage(widthOrPath)
   end
 
@@ -110,7 +110,8 @@ function meta:drawCentered(x, y, flip)
 end
 
 function meta:clear(color)
-  error("[ERR] playdate.graphics.image:clear() is not yet implemented.")
+  -- TODO-Playbit: Need to be able to clear for sure
+  print("[ERR] playdate.graphics.image:clear() is not yet implemented.")
 end
 
 function meta:sample(x, y)
@@ -144,7 +145,8 @@ function meta:drawRotated(x, y, angle, scale, yscale)
 end
 
 function meta:rotatedImage(angle, scale, yscale)
-  error("[ERR] playdate.graphics.image:rotatedImage() is not yet implemented.")
+  print("[ERR] playdate.graphics.image:rotatedImage() is not yet implemented.")
+  return self:copy()
 end
 
 function meta:drawScaled(x, y, scale, yscale)
@@ -182,7 +184,7 @@ function meta:drawSampled(x, y, width, height, centerx, centery, dxx, dyx, dxy, 
 end
 
 function meta:setMaskImage(maskImage)
-  error("[ERR] playdate.graphics.image:setMaskImage() is not yet implemented.")
+  print("[WARN] playdate.graphics.image:setMaskImage() is not yet implemented.")
 end
 
 function meta:getMaskImage()
@@ -252,7 +254,8 @@ function meta:drawFaded(x, y, alpha, ditherType)
 end
 
 function meta:fadedImage(alpha, ditherType)
-  error("[ERR] playdate.graphics.image:fadedImage() is not yet implemented.")
+  print("[WARN] playdate.graphics.image:fadedImage() is not yet implemented.")
+  return self:copy()
 end
 
 function meta:setInverted(flag)

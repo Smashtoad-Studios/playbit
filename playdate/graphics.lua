@@ -287,6 +287,12 @@ function module.setFont(font)
   love.graphics.setFont(font.data)
 end
 
+function module.setFontFamily(fontFamily)
+  print("[WARN] playdate.graphics.setFontFamily() is not yet implemented.")
+  playbit.graphics.activeFont = fontFamily[playdate.graphics.font.kVariantNormal]
+  love.graphics.setFont(fontFamily[playdate.graphics.font.kVariantNormal].data)
+end
+
 function module.getFont()
   return playbit.graphics.activeFont
 end

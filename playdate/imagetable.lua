@@ -59,9 +59,9 @@ function module.new(path, cellsWide, cellsSize)
 
     for i = 1, #actualFilenames, 1 do
       local actualPath = folder.."/"..actualFilenames[i]
-      local img = love.image.newImageData(actualPath..".png")
-      local w = img:getWidth()
-      local h = img:getHeight()
+      local img = playdate.graphics.image.new(actualPath..".png")
+      local w, h = img:getSize()
+
       if w > maxWidth then
         maxWidth = w
       end
