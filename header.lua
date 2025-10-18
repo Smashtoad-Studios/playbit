@@ -117,8 +117,10 @@ function love.draw()
   -- reset back to set color
   love.graphics.setColor(r, g, b, 1)
 
+  -- TODO-Playbit: not a native Playdate SDK functions. Move to Playbit?
   -- update emulated input
   playdate.updateInput()
+  playdate.graphics.animation.loop.update()
 end
 
 function love.run()

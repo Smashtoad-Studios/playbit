@@ -38,6 +38,7 @@ function module.new(imageOrTilemap)
     sprite.zIndex = 0
     sprite.collideRect = nil
     sprite.animator = nil
+    sprite.canUpdate = true
 
     sprite:setScale(1, 1)
     sprite:setCenter(0.5, 0.5)
@@ -467,6 +468,14 @@ function meta:update()
     -- TODO-Playbit: What does a regular sprite do in its update? Anything?
 end
 
+function meta:setUpdatesEnabled(flag)
+    self.canUpdate = false
+end
+
+function meta:updatesEnabled()
+    return self.canUpdate
+end
+
 function meta:draw()
     if self.visible and self.image then
         self.image:draw(self:getCenterPoint())
@@ -498,15 +507,17 @@ end
 -- TODO-Playbit: This needs to be named update()
 function module.updateAll()
     for _, spr in ipairs(allSprites) do
-        if spr.animator then
-            local p = spr.animator:currentValue()
-            spr:moveTo(p.x, p.y)
-            if spr.animator:ended() then
-                spr.animator = nil
+        if spr.canUpdate then
+            if spr.animator then
+                local p = spr.animator:currentValue()
+                spr:moveTo(p.x, p.y)
+                if spr.animator:ended() then
+                    spr.animator = nil
+                end
             end
+            spr:update()
+            spr:draw()
         end
-        spr:update()
-        spr:draw()
     end
 end
 

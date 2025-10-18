@@ -9,17 +9,20 @@ local meta = {}
 meta.__index = meta
 module.__index = meta
 
-function module.new(delay, imageTable, shouldLoop)
+local animationLoops = {}
+setmetatable(animationLoops, {__mode = "v"})
+
+function module.new(interval, imageTable, shouldLoop)
   local animation = setmetatable({}, meta)
   
   animation.startFrame = 1
   animation.endFrame = 1
   animation.frame = 1
   animation.step = 1
-  animation.pause = false
+  animation.paused = false
   animation._startTime = playdate.getCurrentTimeMilliseconds()
 
-  animation.delay = delay or 100
+  animation.interval = interval or 100
   animation._imageTable = imageTable
   animation.shouldLoop = shouldLoop
 
@@ -27,11 +30,34 @@ function module.new(delay, imageTable, shouldLoop)
     animation.endFrame = imageTable:getLength()
   end
 
+  table.insert(animationLoops, animation)
+
   return animation
 end
 
+function module.update()
+  for i = 1, #animationLoops, 1 do
+    local animLoop = animationLoops[i]
+    if animLoop then
+      if not animLoop.paused then
+        local elapsedTime = playdate.getCurrentTimeMilliseconds() - animLoop._startTime
+        animLoop.frame = animLoop.startFrame + math.floor(elapsedTime / animLoop.interval) * animLoop.step
+        if animLoop.frame > animLoop.endFrame then
+          if animLoop.shouldLoop then
+            animLoop.frame = animLoop.startFrame
+            animLoop._startTime = playdate.getCurrentTimeMilliseconds()
+          else
+            -- TODO: just leave the frame at one over the max?
+            animLoop.frame = animLoop.endFrame + 1
+          end
+        end
+      end
+    end
+  end
+end
+
 function meta:image()
-  return self._imageTable:getImage(self.frame)
+  return self._imageTable:getImage(math.min(self.frame, self.endFrame))
 end
 
 function meta:setImageTable(it)
@@ -43,6 +69,8 @@ function meta:isValid()
     return true
   end
 
+  -- TODO-Playbit: should it do greater than, or greater equal check?
+  -- Need to compare to Playdate SDK
   if self.frame > self.endFrame then
     return false
   end
@@ -51,21 +79,7 @@ function meta:isValid()
 end
 
 function meta:draw(x, y, flip)
-  if not self.pause then
-    local elapsedTime = playdate.getCurrentTimeMilliseconds() - self._startTime
-    self.frame = self.startFrame + math.floor(elapsedTime / self.delay) * self.step
-
-    if self.frame > self.endFrame then
-      if self.shouldLoop then
-        self.frame = self.startFrame
-        self._startTime = playdate.getCurrentTimeMilliseconds()
-      else
-        self.frame = self.endFrame
-      end
-    end
-  end
-
-  self._imageTable:drawImage(self.frame, x, y, flip)
+  self._imageTable:drawImage(math.min(self.frame, self.endFrame), x, y, flip)
 end
 
 -- docs: https://sdk.play.date/2.6.2/Inside%20Playdate.html#C-graphics.animation.blinker

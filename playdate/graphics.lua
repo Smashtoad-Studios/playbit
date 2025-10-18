@@ -6,6 +6,7 @@ require("playdate.image")
 require("playdate.imagetable")
 require("playdate.tilemap")
 require("playdate.sprites")
+require("playdate.animation")
 
 module.kDrawModeCopy = 0
 module.kDrawModeWhiteTransparent = 1
@@ -268,6 +269,16 @@ function module.fillTriangle(x1, y1, x2, y2, x3, y3)
   playbit.graphics.shader:send("mode", 8)
 
   love.graphics.polygon("fill", x1, y1, x2, y2, x3, y3)
+  playbit.graphics.updateContext()
+
+  module.setImageDrawMode(playbit.graphics.drawMode)
+end
+
+-- TODO-Playbit: Support arbitrary number of points
+function module.fillPolygon(x1, y1, x2, y2, x3, y3, x4, y4)
+  playbit.graphics.shader:send("mode", 8)
+
+  love.graphics.polygon("fill", x1, y1, x2, y2, x3, y3, x4, y4)
   playbit.graphics.updateContext()
 
   module.setImageDrawMode(playbit.graphics.drawMode)
