@@ -38,6 +38,10 @@ function point.new(x, y)
   return newPoint
 end
 
+function point.meta:offsetBy(dx, dy)
+  return point.new(self.x + dx, self.y + dy)
+end
+
 -- docs: https://sdk.play.date/3.0.0/Inside%20Playdate.html#C-geometry.arc
 
 local arc = {}
