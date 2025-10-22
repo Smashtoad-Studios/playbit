@@ -26,51 +26,7 @@ vec3 rgb2hsv(vec3 c)
 vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
 {
   vec4 outputcolor = Texel(tex, tex_coords) * color;
-  if (mode == 1)                          // ---------- "fillWhite"
-  {
-    if (outputcolor.a > 0) 
-    {
-      if (debugDraw)
-      {
-        return DEBUG;
-      }
-      else
-      {
-        return white;
-      }
-    }
-    else
-    {
-      return TRANSPARENT;
-    }
-  }
-  else if (mode == 2)                     // ---------- "fillBlack"
-  {
-    if (outputcolor.a > 0) 
-    {
-      if (debugDraw)
-      {
-        return DEBUG;
-      }
-      else
-      {
-        return black;
-      }
-    }
-    else
-    {
-      return TRANSPARENT;
-    }
-  }
-  // else if (mode == 2)                  // ---------- "XOR"
-  // {
-  //   // TODO: XOR drawmode
-  // }
-  // else if (mode == 3)                  // ---------- "NXOR"
-  // {
-  //   // TODO: NXOR drawmode
-  // }
-  else if (mode == 4)                  // ---------- "whiteTransparent"
+  if (mode == 1)                  // ---------- "whiteTransparent"
   {
     if (outputcolor.a > 0)
     {
@@ -97,11 +53,55 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
       return TRANSPARENT;
     }
   }
-  // else if (mode == 5)                  // ---------- "blackTransparent"
+  // else if (mode == 2)                  // ---------- "blackTransparent"
   // {
   //   // TODO: blackTransparent drawmode
   // }
-  else if (mode == 6)                  // ---------- "inverted"
+  else if (mode == 3)                          // ---------- "fillWhite"
+  {
+    if (outputcolor.a > 0) 
+    {
+      if (debugDraw)
+      {
+        return DEBUG;
+      }
+      else
+      {
+        return white;
+      }
+    }
+    else
+    {
+      return TRANSPARENT;
+    }
+  }
+  else if (mode == 4)                     // ---------- "fillBlack"
+  {
+    if (outputcolor.a > 0) 
+    {
+      if (debugDraw)
+      {
+        return DEBUG;
+      }
+      else
+      {
+        return black;
+      }
+    }
+    else
+    {
+      return TRANSPARENT;
+    }
+  }
+  // else if (mode == 5)                  // ---------- "XOR"
+  // {
+  //   // TODO: XOR drawmode
+  // }
+  // else if (mode == 6)                  // ---------- "NXOR"
+  // {
+  //   // TODO: NXOR drawmode
+  // }
+  else if (mode == 7)                  // ---------- "inverted"
   {
     if (outputcolor.a > 0)
     {
@@ -127,10 +127,6 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
       // transparent pixel
       return TRANSPARENT;
     }
-  }
-  else if (mode == 7)                     // ---------- ???
-  {
-    // unused
   }
   else if (mode == 8)                     // ---------- "pattern"
   {

@@ -55,6 +55,7 @@ function module.new(imageOrTilemap)
     sprite.collideRect = nil
     sprite.animator = nil
     sprite.canUpdate = true
+    sprite.drawMode = playdate.graphics.kDrawModeCopy
 
     sprite:setScale(1, 1)
     sprite:setCenter(0.5, 0.5)
@@ -104,7 +105,8 @@ function meta:getImage()
 end
 
 function meta:setImageDrawMode(mode)
-    print("[WARN] playdate.graphics.sprite:setImageDrawMode() is not implemented.")
+    self.drawMode = mode
+    print("[WARN] playdate.graphics.sprite:setImageDrawMode() is not fully tested.")
 end
 
 function meta:setSize(w, h)
@@ -391,6 +393,16 @@ function meta:checkCollisions(goalX, goalY)
     return goalX, goalY, collisions, #collisions
 end
 
+function meta:overlappingSprites()
+    local overlapping = {}
+    for _, other in ipairs(allSprites) do
+        if other ~= self and checkAABBCollision(self, other) then
+            overlapping[#overlapping + 1] = other
+        end
+    end
+    return overlapping
+end
+
 -- function meta:moveWithCollisions(goalX, goalY)
 --     local actualX, actualY, collisions, count = self:checkCollisions(goalX, goalY)
     
@@ -506,35 +518,22 @@ end
 
 function meta:draw()
     if self.visible and self.image then
+        if self.drawMode then
+            playbit.graphics.shader:send(playbit.graphics.MODE_KEY, self.drawMode)
+        end
+        
         if self.stencilImage then
             love.graphics.stencil(function () stencilImageFunction(self.stencilImage.data) end, "replace", 1)
             love.graphics.setStencilTest("greater", 0)
         end
+
         self.image:draw(self:getCenterPoint())
 
         love.graphics.setStencilTest()
 
-        -- -- if self.scaleX then
-        -- --     self.image:drawScaled(self.x, self.y, self.scaleX, self.scaleY)
-        -- -- elseif self.angle then
-        -- --     self.image:drawRotated(self.x, self.y, self.angle)
-        -- -- else
-        -- --     self.image:draw(self.x, self.y)
-        -- -- end
-        -- local r, g, b = love.graphics.getColor()
-        -- love.graphics.setColor(1, 1, 1, 1)
-        
-        -- -- love.graphics.push()
-        --     love.graphics.draw(self.image.data,
-        --         self.x, self.y,
-        --         self.angle,
-        --         self.scaleX, self.scaleY,
-        --         self.width * self.centerX, self.height * self.centerY
-        --     )
-        -- -- love.graphics.pop()        
-
-        -- love.graphics.setColor(r, g, b, 1)        
-        -- playbit.graphics.updateContext()
+        if self.drawMode then
+            playbit.graphics.shader:send(playbit.graphics.MODE_KEY, playbit.graphics.drawMode)
+        end
     end
 end
 

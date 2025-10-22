@@ -116,24 +116,35 @@ end
 -- "copy", "inverted", "XOR", "NXOR", "whiteTransparent", "blackTransparent", "fillWhite", or "fillBlack".
 function module.setImageDrawMode(mode)
   playbit.graphics.drawMode = mode
+
+  -- playbit.graphics.shader:send(playbit.graphics.MODE_KEY, playbit.graphics.drawMode)
+
   if mode == module.kDrawModeCopy or mode == "copy" then
-    playbit.graphics.shader:send("mode", 0)
-  elseif mode == module.kDrawModeFillWhite or mode == "fillWhite" then
-    playbit.graphics.shader:send("mode", 1)
-  elseif mode == module.kDrawModeFillBlack or mode == "fillBlack" then
-    playbit.graphics.shader:send("mode", 2)
-  elseif mode == module.kDrawModeInverted or mode == "inverted" then
-    playbit.graphics.shader:send("mode", 6)
+    playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeCopy)
   elseif mode == module.kDrawModeWhiteTransparent or mode == "whiteTransparent" then
-    playbit.graphics.shader:send("mode", 4)
+    playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeWhiteTransparent)
+  elseif mode == module.kDrawModeBlackTransparent or mode == "blackTransparent" then
+    playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeBlackTransparent)
+  elseif mode == module.kDrawModeFillWhite or mode == "fillWhite" then
+    playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeFillWhite)
+  elseif mode == module.kDrawModeFillBlack or mode == "fillBlack" then
+    playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeFillBlack)
+  -- elseif mode == module.kDrawModeXOR or mode == "XOR" then
+  --   print("[WARN] Draw mode 'XOR' is not yet implemented. Draws as inverted.")
+  --   playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeXOR)
+  -- elseif mode == module.kDrawModeNXOR or mode == "NXOR" then
+  --   print("[WARN] Draw mode 'NXOR' is not yet implemented. Draws as inverted.")
+  --   playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeNXOR)
+  elseif mode == module.kDrawModeInverted or mode == "inverted" then
+    playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeInverted)
   else
-    playbit.graphics.shader:send("mode", 0)
     print("[WARN] Draw mode '"..mode.."' is not yet implemented.")
+    playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeCopy)
   end
 end
 
 function module.drawCircleAtPoint(x, y, radius)
-  playbit.graphics.shader:send("mode", 8)
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
 
   love.graphics.circle("line", x, y, radius)
   playbit.graphics.updateContext()
@@ -142,7 +153,7 @@ function module.drawCircleAtPoint(x, y, radius)
 end
 
 function module.fillCircleAtPoint(x, y, radius)
-  playbit.graphics.shader:send("mode", 8)
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
 
   love.graphics.circle("fill", x, y, radius)
   playbit.graphics.updateContext()
@@ -181,7 +192,7 @@ function module.setLineWidth(width)
 end
 
 function module.drawRect(x, y, width, height)
-  playbit.graphics.shader:send("mode", 8)
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
 
   love.graphics.rectangle("line", x, y, width, height)
   playbit.graphics.updateContext()
@@ -190,7 +201,7 @@ function module.drawRect(x, y, width, height)
 end
 
 function module.fillRect(x, y, width, height)
-  playbit.graphics.shader:send("mode", 8)
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
 
   love.graphics.rectangle("fill", x, y, width, height)
   playbit.graphics.updateContext()
@@ -202,7 +213,7 @@ function module.drawRoundRect(x, y, width, height, radius)
   -- TODO: love's rectangle function doesn't draw the same way as Playdate's
   -- TODO-Playbit: Figure out what is different here
   print("[WARN] playdate.graphics.drawRoundRect() does not draw exactly the same as on Playdate.")
-  playbit.graphics.shader:send("mode", 8)
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
 
   love.graphics.rectangle("line", x, y, width, height, radius, radius)
   playbit.graphics.updateContext()
@@ -214,7 +225,7 @@ function module.fillRoundRect(x, y, width, height, radius)
   -- TODO: love's rectangle function doesn't draw the same way as Playdate's
   -- TODO-Playbit: Figure out what is different here
   print("[WARN] playdate.graphics.fillRoundRect() does not draw exactly the same as on Playdate.")
-  playbit.graphics.shader:send("mode", 8)
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
 
   love.graphics.rectangle("fill", x, y, width, height, radius, radius)
   playbit.graphics.updateContext()
@@ -236,7 +247,7 @@ function module.fillEllipseInRect(xOrRect, y, width, height, startAngle, endAngl
 end
 
 function module.drawLine(x1, y1, x2, y2)
-  playbit.graphics.shader:send("mode", 8)
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
 
   love.graphics.line(x1, y1, x2, y2)
   playbit.graphics.updateContext()
@@ -245,7 +256,7 @@ function module.drawLine(x1, y1, x2, y2)
 end
 
 function module.drawArc(x, y, radius, startAngle, endAngle)
-  playbit.graphics.shader:send("mode", 8)
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
 
   -- 0 degrees is 270 when drawing an arc on PD...
   startAngle = startAngle - 90
@@ -266,7 +277,7 @@ function module.drawArc(x, y, radius, startAngle, endAngle)
 end
 
 function module.fillTriangle(x1, y1, x2, y2, x3, y3)
-  playbit.graphics.shader:send("mode", 8)
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
 
   love.graphics.polygon("fill", x1, y1, x2, y2, x3, y3)
   playbit.graphics.updateContext()
@@ -276,7 +287,7 @@ end
 
 -- TODO-Playbit: Support arbitrary number of points
 function module.fillPolygon(x1, y1, x2, y2, x3, y3, x4, y4)
-  playbit.graphics.shader:send("mode", 8)
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
 
   love.graphics.polygon("fill", x1, y1, x2, y2, x3, y3, x4, y4)
   playbit.graphics.updateContext()
@@ -285,7 +296,7 @@ function module.fillPolygon(x1, y1, x2, y2, x3, y3, x4, y4)
 end
 
 function module.drawPixel(x, y)
-  playbit.graphics.shader:send("mode", 8)
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
 
   love.graphics.points(x, y)
   playbit.graphics.updateContext()

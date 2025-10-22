@@ -7,6 +7,7 @@ playbit.graphics = module
 module.COLOR_WHITE = { 176 / 255, 174 / 255, 167 / 255, 1 }
 -- #312f28
 module.COLOR_BLACK = { 49 / 255, 47 / 255, 40 / 255, 1 }
+module.MODE_KEY = "mode"
 
 module.colorWhite = module.COLOR_WHITE
 module.colorBlack = module.COLOR_BLACK
@@ -17,7 +18,8 @@ module.drawColor = module.colorWhite
 module.backgroundColorIndex = 0
 module.backgroundColor = module.colorBlack
 module.activeFont = {}
-module.drawMode = "copy"
+-- module.drawMode = playdate.graphics.kDrawModeCopy
+module.drawMode = 0
 module.canvas = love.graphics.newCanvas()
 module.contextStack = {}
 -- shared quad to reduce gc
