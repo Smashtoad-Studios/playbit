@@ -28,7 +28,7 @@ function module.new(widthOrPath, height, bgColor)
       widthOrPath = widthOrPath..".png"
     end
     img.imgData = love.image.newImageData(widthOrPath)
-    img.data = love.graphics.newImage(widthOrPath)
+    img.data = love.graphics.newImage(img.imgData)
   end
 
   if img.data ~= nil then
@@ -45,8 +45,8 @@ end
 
 function meta:copy()
   local newImg = module.new(self.width, self.height, self.bgColor)
-  --TODO-Playbit: May be a better way to create a copy than this
-  newImg.data = love.graphics.newImage(self.imgData)
+  newImg.imgData = self.imgData:clone()
+  newImg.data = love.graphics.newImage(newImg.imgData)
   --TODO-Playbit: May need to copy over masks, etc. once those are implemented.
   return newImg
 end

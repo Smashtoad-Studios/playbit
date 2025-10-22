@@ -384,14 +384,26 @@ function module.pushContext(image)
 
   -- create canvas if it doesn't exist
   if not image._canvas then
+    -- render the image to the new canvas
     image._canvas = love.graphics.newCanvas(image:getSize())
+    love.graphics.setCanvas({image._canvas, stencil=true})
+    -- clear shader so that canvas is rendered normally
+    love.graphics.setShader()
+    -- always render pure white so its not tinted
+    local r, g, b = love.graphics.getColor()
+    love.graphics.setColor(1, 1, 1, 1)
+    -- draw image to canvas
+    love.graphics.draw(image.data, 0, 0)
+    -- reset back to set color
+    love.graphics.setColor(r, g, b, 1)
+    love.graphics.setShader(playbit.graphics.shader)
   end
   
   -- push context
   table.insert(playbit.graphics.contextStack, image)
 
   -- update current render target
-  love.graphics.setCanvas{(image._canvas), stencil=true}
+  love.graphics.setCanvas({image._canvas, stencil=true})
 end
 
 function module.popContext()
@@ -401,10 +413,10 @@ function module.popContext()
   table.remove(playbit.graphics.contextStack)
   -- update current render target
   if #playbit.graphics.contextStack == 0 then
-    love.graphics.setCanvas{(playbit.graphics.canvas), stencil=true}
+    love.graphics.setCanvas({playbit.graphics.canvas, stencil=true})
   else
     local activeContext = playbit.graphics.contextStack[#playbit.graphics.contextStack]
-    love.graphics.setCanvas{(activeContext._canvas), stencil=true}
+    love.graphics.setCanvas({activeContext._canvas, stencil=true})
   end
 end
 
