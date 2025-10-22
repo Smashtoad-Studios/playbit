@@ -251,6 +251,10 @@ function meta:setIgnoresDrawOffset(flag)
 end
 
 function meta:canCollideWith(other)
+    -- sprites can collide if they both have the default group mask
+    if self.collidesWithGroupsMask == 0x00000000 and other.groupMask == 0x00000000 then
+        return true
+    end
     return bit.band(self.collidesWithGroupsMask, other.groupMask) ~= 0
 end
 
@@ -290,6 +294,9 @@ end
 -- and determines the **collision normal** (direction of impact).
 -- It prevents tunneling by checking **when** the collision happens (0-1 scale).
 local function sweptAABB(self, other, startX, startY, endX, endY)
+    if not self:canCollideWith(other) then return nil, 0, 0 end
+    if not self.collideRect or not other.collideRect then return nil, 0, 0 end
+
     -- Compute movement vector
     local dx, dy = endX - startX, endY - startY
 
