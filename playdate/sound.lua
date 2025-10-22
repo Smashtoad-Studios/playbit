@@ -297,3 +297,35 @@ end
 function channel.meta:getWetLevelSignal()
   error("[ERR] playdate.sound.channel:getWetLevelSignal() is not yet implemented.")
 end
+
+
+-- docs: https://sdk.play.date/3.0.0/Inside%20Playdate.html#_mic_input
+
+local micinput = {}
+playdate.sound.micinput = micinput
+
+function micinput.recordToSample(buffer, completionCallback)
+  error("[ERR] playdate.sound.micinput.recordToSample() is not yet implemented.")
+end
+
+function micinput.stopRecording()
+  print("[WARN] playdate.sound.micinput.stopRecording() is not yet implemented.")
+end
+
+function micinput.startListening(source)
+  print("[WARN] playdate.sound.micinput.stopListening() is not yet implemented.")
+  return true, nil
+end
+
+function micinput.stopListening()
+  print("[WARN] playdate.sound.micinput.stopListening() is not yet implemented.")
+end
+
+function micinput.getLevel()
+  print("[WARN] playdate.sound.micinput.getLevel() is not yet implemented.")
+  return 0
+end
+
+function micinput.getSource()
+  error("[ERR] playdate.sound.micinput.getSource() is not yet implemented.")
+end
