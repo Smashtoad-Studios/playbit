@@ -19,14 +19,9 @@ module.__index = meta
 -- TODO-Playbit: Need to fully implement animators
 function module.new(duration, ...)
     -- TODO-Playbit: Why does table.pack not work here...
-    local args = {n=select("#", ...), ...}
-    print(args.n)
-
-    print(args[1])
-    print(args[2])
+    local args = playbit.table.pack(...)
 
     @@ASSERT(args.n > 0, "[ERR] animator requires at least two parameters")
-    
 
     local newAnimator = setmetatable({}, meta)
 

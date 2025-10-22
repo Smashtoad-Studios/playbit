@@ -9,3 +9,11 @@ function module.getSize(table)
     end
     return count
 end
+
+function module.unpack(table)
+    return unpack(table)
+end
+
+function module.pack(...)
+    return {n=select("#", ...), ...}
+end
