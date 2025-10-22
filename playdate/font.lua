@@ -144,7 +144,9 @@ function meta:_drawTextInRect(text, x, y, width, height, leadingAdjustment, trun
     if lineHeight * (lineCount + 1) > height 
     or lineHeight * (lineCount + 2) > height then
       -- this line or the next line surpasses specified max height
-      line = line..truncationString
+      if truncationString then
+        line = line..truncationString
+      end
       local lineWidth = self:getTextWidth(line)
       if lineWidth > largestLineWidth then
         largestLineWidth = lineWidth
