@@ -48,6 +48,10 @@ function sampleplayer.meta:isPlaying()
   return self.data:isPlaying()
 end
 
+function sampleplayer.meta:getLength()
+  return self.data:getDuration()
+end
+
 function sampleplayer.meta:setFinishCallback()
   print("[WARN] playdate.sound.sampleplayer:setFinishCallback() is not yet implemented.")
 end
