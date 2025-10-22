@@ -267,12 +267,20 @@ function love.wheelmoved(x, y)
 
   -- TODO: emulate PD crank acceleration?
   -- TODO: configure scroll sensitivity?
-  crankPos = crankPos + -y * 6
+  local diff = -y * 6
+  crankPos = crankPos + diff
   
   if crankPos < 0 then
     crankPos = 359
   elseif crankPos > 359 then
     crankPos = 0
+  end
+
+  local currentInputHandler = inputHandlerStack[#inputHandlerStack]
+  if currentInputHandler then
+    if currentInputHandler.handler.cranked then
+      currentInputHandler.handler.cranked(diff, diff)
+    end
   end
 end
 
