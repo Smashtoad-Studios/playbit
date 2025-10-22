@@ -13,6 +13,8 @@ function timer.new(duration, ...)
 	@@ASSERT(type(duration) == "number", "[ERR] playdate.timer.new duration is not passed in or is a not number")
 
 	local timer = timer(duration, ...)
+	timer.timeLeft = duration
+
 	table.insert(timers, timer)
 
 	return timer
@@ -63,6 +65,11 @@ function timer:advanceTimer()
     -- update timer
     self:setCurrentDuration(self:getCurrentDuration() + dt)
 	return true
+end
+
+function timer:setCurrentDuration(duration)
+	timer.super.setCurrentDuration(self, duration)
+	self.timeLeft = self.duration - self.currentTime
 end
 
 function timer:repeatTimer()

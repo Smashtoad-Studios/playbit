@@ -51,8 +51,8 @@ function baseTimer:init(duration, ...)
 	self._remainingDelay = nil 
 	self._hasReversed = false
 
-	self:setCurrentDuration(0)
 	self.duration = duration
+	self:setCurrentDuration(0)
 	self.active = true
 	self.delay = 0
 	self.paused = false
@@ -116,6 +116,12 @@ function baseTimer.updateTimers(timers, timersToRemove)
 			goto continue
 		end
 
+		if timer:getCurrentDuration() == nil then
+			print("timer current duration is nil")
+		end
+		if timer.duration == nil then
+			print("timer duration is nil")
+		end
 		if timer:getCurrentDuration() <= timer.duration then
 			-- timer still running
 			updateTimerValue(timer)
