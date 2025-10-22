@@ -142,7 +142,7 @@ function module.updateContext()
   -- love2d doesn't allow calling newImageData() when canvas is active
   love.graphics.setCanvas()
   local imageData = activeContext._canvas:newImageData()
-  love.graphics.setCanvas(activeContext._canvas)
+  love.graphics.setCanvas{(activeContext._canvas), stencil=true}
 
   -- update image
   activeContext.data:replacePixels(imageData)

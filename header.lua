@@ -66,7 +66,7 @@ function love.draw()
   end
 
   -- render to canvas to allow 2x scaling
-  love.graphics.setCanvas(playbit.graphics.canvas)
+  love.graphics.setCanvas{(playbit.graphics.canvas), stencil=true}
   love.graphics.setShader(playbit.graphics.shader)
 
   --[[ 

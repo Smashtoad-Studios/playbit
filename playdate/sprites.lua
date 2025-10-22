@@ -9,6 +9,22 @@ module.kCollisionTypeBounce = "bounce"
 
 playdate.graphics.sprite = module
 
+local mask_shader = love.graphics.newShader[[
+   vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+      if (Texel(texture, texture_coords).rgb == vec3(0.0)) {
+         // a discarded pixel wont be applied as the stencil.
+         discard;
+      }
+      return vec4(1.0);
+   }
+]]
+
+local function stencilImageFunction(img)
+   love.graphics.setShader(mask_shader)
+   love.graphics.draw(img, 0, 0)
+   love.graphics.setShader(playbit.graphics.shader)
+end
+
 local meta = {}
 meta.__index = meta
 module.__index = meta
@@ -139,15 +155,16 @@ function meta:getZIndex()
 end
 
 function meta:setStencilImage(stencil)
-    print("[WARN] playdate.graphics.sprite:setStencilImage() is not yet implemented.")
+    -- print("[WARN] playdate.graphics.sprite:setStencilImage() is not fully tested.")
+    self.stencilImage = stencil
 end
 
 function meta:clearStencil()
-    print("[WARN] playdate.graphics.sprite:clearStencil() is not yet implemented.")
+    -- print("[WARN] playdate.graphics.sprite:clearStencil() is not fully tested.")
+    self.stencilImage = nil
 end
 
 function meta:setAnimator(animator)
-    print("Setting animator")
     animator:currentValue()
     self.animator = animator
 end
@@ -221,6 +238,10 @@ end
 function meta:setClipRect(xOrRect, y, width, height)
     -- TODO-Playbit: Implement clip rect
     print("[WARN] playdate.graphics.sprite setClipRect() does not yet have any effect.")
+end
+
+function meta:clearCollideRect()
+    self.collideRect = nil
 end
 
 function meta:setIgnoresDrawOffset(flag)
@@ -478,7 +499,13 @@ end
 
 function meta:draw()
     if self.visible and self.image then
+        if self.stencilImage then
+            love.graphics.stencil(function () stencilImageFunction(self.stencilImage.data) end, "replace", 1)
+            love.graphics.setStencilTest("greater", 0)
+        end
         self.image:draw(self:getCenterPoint())
+
+        love.graphics.setStencilTest()
 
         -- -- if self.scaleX then
         -- --     self.image:drawScaled(self.x, self.y, self.scaleX, self.scaleY)

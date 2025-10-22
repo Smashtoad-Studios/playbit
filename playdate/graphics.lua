@@ -391,7 +391,7 @@ function module.pushContext(image)
   table.insert(playbit.graphics.contextStack, image)
 
   -- update current render target
-  love.graphics.setCanvas(image._canvas)
+  love.graphics.setCanvas{(image._canvas), stencil=true}
 end
 
 function module.popContext()
@@ -401,10 +401,10 @@ function module.popContext()
   table.remove(playbit.graphics.contextStack)
   -- update current render target
   if #playbit.graphics.contextStack == 0 then
-    love.graphics.setCanvas(playbit.graphics.canvas)
+    love.graphics.setCanvas{(playbit.graphics.canvas), stencil=true}
   else
     local activeContext = playbit.graphics.contextStack[#playbit.graphics.contextStack]
-    love.graphics.setCanvas(activeContext._canvas)
+    love.graphics.setCanvas{(activeContext._canvas), stencil=true}
   end
 end
 
