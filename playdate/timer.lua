@@ -66,9 +66,9 @@ function timer:advanceTimer()
 end
 
 function timer:repeatTimer()
-      local ct = timer:getCurrentDuration()
+      local ct = self:getCurrentDuration()
       -- continue off from where the timer ended so there isn't a huge gap on first tick
-      timer:setCurrentDuration(ct - timer.duration)
+      self:setCurrentDuration(ct - self.duration)
 end
 
 function timer.unitTest()
