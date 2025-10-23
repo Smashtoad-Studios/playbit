@@ -20,6 +20,8 @@ function import(path)
 end
 
 local firstFrame = true
+-- The frame buffer is used for XOR and NXOR draw modes
+local framebuffer
 local windowWidth, windowHeight = playbit.graphics.getWindowSize()
 
 playbit.graphics.canvas:setFilter("nearest", "nearest")
@@ -43,7 +45,18 @@ function love.draw()
   local canvasHeight = playbit.graphics.canvas:getHeight()
   if canvasWidth ~= newCanvasWidth or canvasHeight ~= newCanvasHeight then
     playbit.graphics.canvas = love.graphics.newCanvas(newCanvasWidth, newCanvasHeight)
+    framebuffer = love.graphics.newCanvas(newCanvasWidth, newCanvasHeight)
   end
+
+  -- copy previous frame into framebuffer
+  love.graphics.setCanvas(framebuffer)
+  love.graphics.clear()
+  love.graphics.setColor(1, 1, 1, 1)
+  love.graphics.draw(playbit.graphics.canvas)
+  love.graphics.setCanvas()
+
+  -- send framebuffer to shader
+  playbit.graphics.shader:send("destTex", framebuffer)
 
   -- must be changed at start of frame - love2d doesn't allow changing window size with canvas active
   local newWindowWidth, newWindowHeight = playbit.graphics.getWindowSize()

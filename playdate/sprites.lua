@@ -483,6 +483,10 @@ function meta:getRotation()
     return self.angle
 end
 
+function meta:setImageDrawMode(mode)
+    self.drawMode = mode
+end
+
 function meta:setVisible(flag)
     self.visible = flag
 end
