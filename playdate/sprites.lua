@@ -484,7 +484,7 @@ function meta:getRotation()
 end
 
 function meta:setVisible(flag)
-    self.visible = flage
+    self.visible = flag
 end
 
 function meta:isVisible()
