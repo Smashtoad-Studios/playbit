@@ -89,7 +89,7 @@ function meta:draw(x, y, flip, qx, qy, qw, qh)
   if qx and qy and qw and qh then
     local w, h = self:getSize()
     playbit.graphics.quad:setViewport(qx, qy, qw, qh, w, h)
-    love.graphics.draw(self.data, playbit.graphics.quad, x, y, sx, sy)
+    love.graphics.draw(self.data, playbit.graphics.quad, x, y, 0, sx, sy)
   else
     love.graphics.draw(self.data, x, y, 0, sx, sy)
   end
@@ -213,28 +213,30 @@ function meta:drawTiled(x, y, width, height, flip)
   local r, g, b = love.graphics.getColor()
   love.graphics.setColor(1, 1, 1, 1)
 
+  local w = self.data:getWidth()
+  local h = self.data:getHeight() 
+
   local scaleX = 1
   local scaleY = 1
+
   if flip then
-    local w = self.data:getWidth()
-    local h = self.data:getHeight()
     if flip == playdate.graphics.kImageFlippedX then
       scaleX = -1
-      x = x + w
+      x = x + width
     elseif flip == playdate.graphics.kImageFlippedY then
       scaleY = -1
-      y = y + h
+      y = y + height
     elseif flip == playdate.graphics.kImageFlippedXY then
       scaleX = -1
       scaleY = -1
-      x = x + w
-      y = y + h
+      x = x + width
+      y = y + height
     end
   end
   
   self.data:setWrap("repeat", "repeat")
-  playbit.graphics.quad:setViewport(x, y, width, height, w, h)
-  love.graphics.draw(self.data, playbit.graphics.quad, x, y, scaleX, scaleY)
+  playbit.graphics.quad:setViewport(0, 0, width, height, w, h)
+  love.graphics.draw(self.data, playbit.graphics.quad, x, y, 0, scaleX, scaleY)
 
   love.graphics.setColor(r, g, b, 1)
   playbit.graphics.updateContext()
