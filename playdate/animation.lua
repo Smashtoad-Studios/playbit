@@ -20,7 +20,7 @@ function module.new(interval, imageTable, shouldLoop)
   animation.frame = 1
   animation.step = 1
   animation.paused = false
-  animation._startTime = playdate.getCurrentTimeMilliseconds()
+  animation._elapsedTime = 0.0
 
   animation.interval = interval or 100
   animation._imageTable = imageTable
@@ -36,18 +36,33 @@ function module.new(interval, imageTable, shouldLoop)
 end
 
 function module.update()
+  local deltaTimeMs = love.timer.getDelta() * 1000
   for i = 1, #animationLoops, 1 do
     local animLoop = animationLoops[i]
     if animLoop then
       if not animLoop.paused then
-        local elapsedTime = playdate.getCurrentTimeMilliseconds() - animLoop._startTime
-        animLoop.frame = animLoop.startFrame + math.floor(elapsedTime / animLoop.interval) * animLoop.step
+        animLoop._elapsedTime = animLoop._elapsedTime + deltaTimeMs
+
+        if animLoop.frame < animLoop.startFrame then
+          animLoop.frame = animLoop.startFrame
+        end
+
+        -- figure out how many full intervals have been passed since last update
+        local intervalProgress = animLoop._elapsedTime / animLoop.interval
+        local fullIntervals = math.floor(intervalProgress)
+
+        -- reset the elapsed time, keeping the partial interval amount
+        animLoop._elapsedTime = animLoop._elapsedTime - (fullIntervals * animLoop.interval)
+
+        -- increment the frame by the number of full steps
+        animLoop.frame = animLoop.frame + (fullIntervals * animLoop.step)
+
+        -- check if the animation should loop
         if animLoop.frame > animLoop.endFrame then
           if animLoop.shouldLoop then
             animLoop.frame = animLoop.startFrame
-            animLoop._startTime = playdate.getCurrentTimeMilliseconds()
           else
-            -- TODO: just leave the frame at one over the max?
+            -- just leave the frame at one over the max so we know it has finished
             animLoop.frame = animLoop.endFrame + 1
           end
         end
@@ -57,7 +72,7 @@ function module.update()
 end
 
 function meta:image()
-  return self._imageTable:getImage(math.min(self.frame, self.endFrame))
+  return self._imageTable:getImage(math.max(math.min(self.frame, self.endFrame), self.startFrame))
 end
 
 function meta:setImageTable(it)
@@ -79,7 +94,7 @@ function meta:isValid()
 end
 
 function meta:draw(x, y, flip)
-  self._imageTable:drawImage(math.min(self.frame, self.endFrame), x, y, flip)
+  self._imageTable:drawImage(math.max(math.min(self.frame, self.endFrame), self.startFrame), x, y, flip)
 end
 
 -- docs: https://sdk.play.date/2.6.2/Inside%20Playdate.html#C-graphics.animation.blinker
