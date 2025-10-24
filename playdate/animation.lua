@@ -35,6 +35,8 @@ function module.new(interval, imageTable, shouldLoop)
   return animation
 end
 
+-- TODO-Playbit: refactor to remove need for an update call on animation loops
+-- Use meta table to update the animation loop each time the current frame is requested
 function module.update()
   local deltaTimeMs = love.timer.getDelta() * 1000
   for i = 1, #animationLoops, 1 do

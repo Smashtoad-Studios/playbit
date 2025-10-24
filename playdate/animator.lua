@@ -12,59 +12,92 @@ local meta = {}
 meta.__index = meta
 module.__index = meta
 
--- note: this function has 5 overloaded definitions as of 2.6.2. 
--- the parameters will first need to be interpreted, then passed off to an appropriate local function for processing.
--- playdate.graphics.animator.new(duration, startValue, endValue, [easingFunction, [startTimeOffset]])
--- playdate.graphics.animator.new(duration, lineSegment, [easingFunction, [startTimeOffset]])
--- TODO-Playbit: Need to fully implement animators
-function module.new(duration, ...)
-    -- TODO-Playbit: Why does table.pack not work here...
-    local args = playbit.table.pack(...)
+local function newNumberOrPointAnimator(type, startValue, endValue, easingFunction, startTimeOffset)
+    local newAnimator = setmetatable({}, meta)
+    newAnimator.type = type
+    newAnimator.startTimeOffset = startTimeOffset or 0
+    newAnimator.easingFunction = easingFunction or playdate.easingFunctions.linear
+    newAnimator.startValue = startValue
+    newAnimator.endValue = endValue
+    newAnimator.change = endValue - startValue
+    print("[WARN] animator for type '" .. type .. "' is not fully implemented.")
+    return newAnimator
+end
 
-    @@ASSERT(args.n > 0, "[ERR] animator requires at least two parameters")
+local function newGeometryAnimator(type, geom, easingFunction, startTimeOffset)
+    local newAnimator = setmetatable({}, meta)
+    newAnimator.type = type
+    newAnimator.startTimeOffset = startTimeOffset or 0
+    newAnimator.easingFunction = easingFunction or playdate.easingFunctions.linear
+    newAnimator.geometry = geom
+    print("[WARN] animator for type '" .. type .. "' is not fully implemented.")
+    return newAnimator
+end
+
+local function newPartsAnimator(duration, parts, easingFunctions, startTimeOffset)
+    error("[ERR] animator for polygon is not implemented.")
+end
+
+
+function module.new(duration, a, b, c, d)
+    @@ASSERT(type(duration) == "number", "[ERR] animator requires a valid duration")
+    @@ASSERT(a ~= nil, "[ERR] animator requires at least two parameters")
 
     local newAnimator = setmetatable({}, meta)
-
-    -- TODO-Playbit: Need to parse all params
-    -- this is some kind of geometry
-    if type(args[1]) == "number" then
-        -- there should be two number values
-        if args[2] == nil or type(args[2]) ~= "number" then
-            error("[ERR] unsupported parameters to animator.")
-        end
-        newAnimator.type = "number"
-        print("[WARN] animator for two number values is not implemented.")
-    elseif type(args[1]) == "table" then
-        -- there could be a single geometry object, or a start and end point
-        if args[2] == nil then
-            newAnimator.type = "geometry"
-            print("[WARN] animator for geometry values besides a line segment is not implemented.")
-        elseif type(args[2]) == "table" then
-            newAnimator.type = "point"
-            print("[WARN] animator for two point values is not implemented.")
-        end
+    if type(a) == "number" and type(b) == "number" then
+        newAnimator = newNumberOrPointAnimator("number", a, b, c, d)
+    elseif a.type == "point" and b.type == "point" then
+        newAnimator = newNumberOrPointAnimator("point", a, b, c, d)
+    elseif a.type == "lineSegment" then
+        newAnimator = newGeometryAnimator("lineSegment", a, b, c)
+    elseif a.type == "arc" then
+        newAnimator = newGeometryAnimator("arc", a, b, c)
+    elseif a.type == "polygon" then
+        newAnimator = newGeometryAnimator("polygon", a, b, c)
+    elseif type(a) == "table" and type(b) == "table" then
+        newAnimator = newPartsAnimator(duration, a, b, c)
     else
-        error("[ERR] unsupported second parameter to animator.")
+        -- invalid parameters
+        error("[ERR] invalid parameters to playdate.graphics.animator.new")
     end
 
-    print("[WARN] playdate.graphics.animator.new() is not yet fully implemented.")
+    newAnimator.repeatCount = 0
+    newAnimator.reverses = false
+    newAnimator.easingPeriod = nil
+    newAnimator.easingAmplitude = nil
+    newAnimator.startTime = playdate.getCurrentTimeMilliseconds()
+    newAnimator.duration = duration
+
     return newAnimator
 end
 
 function meta:currentValue()
     print("[WARN] playdate.graphics.animator:currentValue() is not yet implemented.")
-    if self.type == "number" then
-        return 0
-    else
-        return {x = 0, y = 0}
-    end
+    local elapsedTime = playdate.getCurrentTimeMilliseconds() - self.startTime
+    return self:valueAtTime(elapsedTime)
 end
 
 function meta:valueAtTime(time)
-    print("[WARN] playdate.graphics.animator:valueAtTime() is not yet implemented.")
+    -- TODO-Playbit: check repeatCount and reverses
+    if self.repeatCount < 0 then
+        -- loop time around indefinitely
+        time = time % self.duration
+    end
+
     if self.type == "number" then
-        return 0
+        return self.easingFunction(time, self.startValue, self.change, self.duration, self.easingAmplitude, self.easingPeriod)
+    elseif self.type == "point" then
+        local x = self.easingFunction(time, self.startValue.x, self.change.x, self.duration, self.easingAmplitude, self.easingPeriod)
+        local y = self.easingFunction(time, self.startValue.y, self.change.y, self.duration, self.easingAmplitude, self.easingPeriod)
+        return playdate.geometry.point.new(x, y)
+    elseif self.type == "lineSegment" then
+        local distance = self.easingFunction(time, 0, self.geometry:length(), self.duration, self.easingAmplitude, self.easingPeriod)
+        return self.geometry:pointOnLine(distance, true)
+    elseif self.type == "arc" then
+        local distance = self.easingFunction(time, 0, self.geometry:length(), self.duration, self.easingAmplitude, self.easingPeriod)
+        return self.geometry:pointOnArc(distance, true)
     else
+        print("[WARN] playdate.graphics.animator:valueAtTime() is not yet implemented for animators of type: '" .. self.type .. "'")
         return {x = 0, y = 0}
     end
 end
@@ -74,12 +107,19 @@ function meta:progress()
 end
 
 function meta:reset(duration)
-    print("[WARN] playdate.graphics.animator:reset() is not yet implemented.")
+    self.startTime = playdate.getCurrentTimeMilliseconds()
+    if duration ~= nil then
+        self.duration = duration
+    end
 end
 
 function meta:ended()
-    print("[WARN] playdate.graphics.animator:ended() is not yet implemented.")
-    return true
+    if self.repeatCount < 0 then
+        return false
+    end
+
+    -- TODO there's more to it than this
+    return playdate.getCurrentTimeMilliseconds() - self.startTime > self.duration
 end
 
 module.easingAmplitude = nil
