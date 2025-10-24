@@ -72,7 +72,6 @@ function module.new(duration, a, b, c, d)
 end
 
 function meta:currentValue()
-    print("[WARN] playdate.graphics.animator:currentValue() is not yet implemented.")
     local elapsedTime = playdate.getCurrentTimeMilliseconds() - self.startTime
     return self:valueAtTime(elapsedTime)
 end

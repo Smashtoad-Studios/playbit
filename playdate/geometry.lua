@@ -135,7 +135,7 @@ function arc.new(x, y, radius, startAngle, endAngle, direction)
   newArc.radius = radius
   newArc.startAngle = startAngle
   newArc.endAngle = endAngle
-  newArc.direction = direction
+  newArc.clockwise = direction
   return newArc
 end
 
@@ -151,7 +151,10 @@ function arc.meta:pointOnArc(distance, extend)
     percentage = math.min(math.max(0, distance), 1)
   end
 
-  -- TODO-Playbit: handle direction
+  if not self.clockwise then
+    percentage = percentage * -1
+  end
+
   local angleRange = math.abs(self.endAngle - self.startAngle)
   local newAngle = math.rad(self.startAngle + angleRange * percentage)
 
