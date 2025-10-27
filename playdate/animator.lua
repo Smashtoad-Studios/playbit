@@ -1,8 +1,5 @@
 -- docs: https://sdk.play.date/2.6.2/Inside%20Playdate.html#C-graphics.animator
 
--- TODO-Playbit: is this needed?
--- require("easing")
-
 playdate.graphics = playdate.graphics or {}
 
 local module = {}
@@ -20,7 +17,9 @@ local function newNumberOrPointAnimator(type, startValue, endValue, easingFuncti
     newAnimator.startValue = startValue
     newAnimator.endValue = endValue
     newAnimator.change = endValue - startValue
-    print("[WARN] animator for type '" .. type .. "' is not fully implemented.")
+    if startTimeOffset ~= nil then
+        print("[WARN] startTimeOffset for animator of type '" .. type .. "' is not implemented")
+    end
     return newAnimator
 end
 
@@ -28,16 +27,38 @@ local function newGeometryAnimator(type, geom, easingFunction, startTimeOffset)
     local newAnimator = setmetatable({}, meta)
     newAnimator.type = type
     newAnimator.startTimeOffset = startTimeOffset or 0
-    newAnimator.easingFunction = easingFunction or playdate.easingFunctions.linear
+    if startTimeOffset ~= nil then
+        print("[WARN] startTimeOffset for animator of type '" .. type .. "' is not implemented")
+    end
     newAnimator.geometry = geom
-    print("[WARN] animator for type '" .. type .. "' is not fully implemented.")
     return newAnimator
 end
 
 local function newPartsAnimator(duration, parts, easingFunctions, startTimeOffset)
-    error("[ERR] animator for polygon is not implemented.")
+    error("[ERR] animator for 'parts' is not implemented")
 end
 
+local function updateTime(self, time)
+    if time < 0 then
+        return 0
+    end
+    local totalDuration = self.duration * (self.repeatCount + 1)
+    if self.reverses then
+        totalDuration = totalDuration * 2
+    end
+    if self.repeatCount == -1 or time < totalDuration then
+        if self.reverses then
+            local isForwards = math.floor(time / self.duration) % 2 == 0
+            local currentProgress = time % self.duration
+            time = isForwards and currentProgress or (self.duration - currentProgress)
+        elseif time > self.duration then
+            time = time % self.duration
+        end
+    else
+        self.hasEnded = true
+    end
+    return time
+end
 
 function module.new(duration, a, b, c, d)
     @@ASSERT(type(duration) == "number", "[ERR] animator requires a valid duration")
@@ -53,6 +74,7 @@ function module.new(duration, a, b, c, d)
     elseif a.type == "arc" then
         newAnimator = newGeometryAnimator("arc", a, b, c)
     elseif a.type == "polygon" then
+        print("[WARN] animator for type 'polygon' is not fully implemented.")
         newAnimator = newGeometryAnimator("polygon", a, b, c)
     elseif type(a) == "table" and type(b) == "table" then
         newAnimator = newPartsAnimator(duration, a, b, c)
@@ -77,11 +99,7 @@ function meta:currentValue()
 end
 
 function meta:valueAtTime(time)
-    -- TODO-Playbit: check repeatCount and reverses
-    if self.repeatCount < 0 then
-        -- loop time around indefinitely
-        time = time % self.duration
-    end
+    time = updateTime(self, time)
 
     if self.type == "number" then
         return self.easingFunction(time, self.startValue, self.change, self.duration, self.easingAmplitude, self.easingPeriod)
@@ -96,7 +114,7 @@ function meta:valueAtTime(time)
         local distance = self.easingFunction(time, 0, self.geometry:length(), self.duration, self.easingAmplitude, self.easingPeriod)
         return self.geometry:pointOnArc(distance, true)
     else
-        print("[WARN] playdate.graphics.animator:valueAtTime() is not yet implemented for animators of type: '" .. self.type .. "'")
+        print("[WARN] playdate.graphics.animator:valueAtTime() is not yet implemented for animator of type: '" .. self.type .. "'")
         return {x = 0, y = 0}
     end
 end
@@ -113,12 +131,12 @@ function meta:reset(duration)
 end
 
 function meta:ended()
-    if self.repeatCount < 0 then
-        return false
+    if self.hasEnded then
+        return true
     end
 
-    -- TODO there's more to it than this
-    return playdate.getCurrentTimeMilliseconds() - self.startTime > self.duration
+    updateTime(self, playdate.getCurrentTimeMilliseconds() - self.startTime)
+    return false
 end
 
 module.easingAmplitude = nil
