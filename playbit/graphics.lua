@@ -146,9 +146,12 @@ function module.updateContext()
   local imageData = activeContext._canvas:newImageData()
   love.graphics.setCanvas({activeContext._canvas, stencil=true})
 
-  -- update image
-  activeContext.data:replacePixels(imageData)
-  -- also update the raw image data so we can duplcate the image as needed
-  activeContext.imgData = imageData
+  -- check if active context is an image
+  if activeContext.data then
+    -- update image
+    activeContext.data:replacePixels(imageData)
+    -- also update the raw image data so we can duplcate the image as needed
+    activeContext.imgData = imageData
+  end
 end
 !end

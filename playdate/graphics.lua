@@ -45,6 +45,7 @@ function module.getDrawOffset()
 end
 
 function module.setBackgroundColor(color)
+  -- TODO: save this to graphics context
   @@ASSERT(color == 1 or color == 0, "Only values of 0 (black) or 1 (white) are supported.")
   playbit.graphics.backgroundColorIndex = color
   if color == 1 then
@@ -55,7 +56,13 @@ function module.setBackgroundColor(color)
   -- don't actually set love's bg color here since doing so immediately sets the color, and this is not consistent with PD
 end
 
+function module.getBackgroundColor()
+  error("playdate.graphics.getBackgroundColor() is not implemented")
+end
+
+
 function module.setColor(color)
+  -- TODO: save this to graphics context
   @@ASSERT(color == 1 or color == 0, "Only values of 0 (black) or 1 (white) are supported.")
   playbit.graphics.drawColorIndex = color
   -- when drawing without a pattern, we must flip the pattern mask for white/black because of the way the shader draws patterns
@@ -74,7 +81,12 @@ function module.setColor(color)
   end
 end
 
+function module.getColor()
+  error("playdate.graphics.getColor() is not implemented")
+end
+
 function module.setPattern(pattern)
+  -- TODO: save this to graphics context
   playbit.graphics.drawPattern = pattern
 
   -- bitshifting does not work in shaders, so do it here in Lua
@@ -115,6 +127,7 @@ end
 
 -- "copy", "inverted", "XOR", "NXOR", "whiteTransparent", "blackTransparent", "fillWhite", or "fillBlack".
 function module.setImageDrawMode(mode)
+  -- TODO: save this to graphics context
   playbit.graphics.drawMode = mode
 
   -- playbit.graphics.shader:send(playbit.graphics.MODE_KEY, playbit.graphics.drawMode)
@@ -141,6 +154,10 @@ function module.setImageDrawMode(mode)
     print("[WARN] Draw mode '"..mode.."' is not yet implemented.")
     playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeCopy)
   end
+end
+
+function module.getImageDrawMode()
+  error("playdate.graphics.getImageDrawMode() is not implemented")
 end
 
 function module.drawCircleAtPoint(x, y, radius)
@@ -188,7 +205,20 @@ function module.drawCircleInRect(xOrRect, y, width, height)
 end
 
 function module.setLineWidth(width)
+  -- TODO: save this to graphics context
   love.graphics.setLineWidth(width)
+end
+
+function module.getLineWidth()
+  error("playdate.graphics.getLineWidth() is not implemented")
+end
+
+function module.setStrokeLocation(location)
+  error("playdate.graphics.setStrokeLocation() is not implemented")
+end
+
+function module.getStrokeLocation()
+  error("playdate.graphics.getStrokeLocation() is not implemented")
 end
 
 function module.drawRect(x, y, width, height)
@@ -255,6 +285,11 @@ function module.drawLine(x1, y1, x2, y2)
   module.setImageDrawMode(playbit.graphics.drawMode)
 end
 
+function module.setLineCapStyle(style)
+  error("[ERR] playdate.graphics.setLineCapStyle() is not yet implemented.")
+end
+
+-- TODO-Playbit: Handle just an arc parameter
 function module.drawArc(x, y, radius, startAngle, endAngle)
   playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
 
@@ -310,6 +345,7 @@ function module.setFont(font)
 end
 
 function module.setFontFamily(fontFamily)
+  -- TODO: save this to graphics context
   print("[WARN] playdate.graphics.setFontFamily() is not yet implemented.")
   playbit.graphics.activeFont = fontFamily[playdate.graphics.font.kVariantNormal]
   love.graphics.setFont(fontFamily[playdate.graphics.font.kVariantNormal].data)
@@ -389,9 +425,15 @@ function module.checkAlphaCollision(image1, x1, y1, flip1, image2, x2, y2, flip2
   error("[ERR] playdate.graphics.checkAlphaCollision() is not yet implemented.")
 end
 
+-- TODO: contexts still need to track any modifications to the context, e.g. line width, color, draw mode
 function module.pushContext(image)
-  -- TODO: PD docs say image is optional, but not passing an image just results in drawing to last context?
-  @@ASSERT(image, "Missing image parameter.")
+  if not image then
+    -- push context
+    table.insert(playbit.graphics.contextStack, {_canvas = playbit.graphics.canvas})
+    -- update current render target
+    love.graphics.setCanvas({playbit.graphics.canvas, stencil=true})
+    return
+  end
 
   -- create canvas if it doesn't exist
   if not image._canvas then
@@ -432,5 +474,61 @@ function module.popContext()
 end
 
 function module.setDitherPattern()
+  -- TODO: save this to graphics context
   print("[ERR] playdate.graphics.setDitherPattern() is not yet implemented.")
+end
+
+function module.setClipRect(xOrRect, y, width, height)
+  -- TODO: save this to graphics context
+  print("[WARN] playdate.graphics.setClipRect() is not yet implemented.")
+end
+
+function module.getClipRect()
+  -- TODO: save this to graphics context
+  error("[ERR] playdate.graphics.getClipRect() is not yet implemented.")
+end
+
+function module.setScreenClipRect(xOrRect, y, width, height)
+  -- TODO: save this to graphics context
+  error("[ERR] playdate.graphics.setScreenClipRect() is not yet implemented.")
+end
+
+function module.getScreenClipRect()
+  -- TODO: save this to graphics context
+  error("[ERR] playdate.graphics.getScreenClipRect() is not yet implemented.")
+end
+
+function module.clearScreenClipRect()
+  -- TODO: save this to graphics context
+  error("[ERR] playdate.graphics.clearScreenClipRect() is not yet implemented.")
+end
+
+function module.setStencilImage(image, tile)
+  -- TODO: save this to graphics context
+  error("[ERR] playdate.graphics.setStencilImage() is not yet implemented.")
+end
+
+function module.setStencilPattern(pattern)
+  -- TODO: save this to graphics context
+  error("[ERR] playdate.graphics.setStencilPattern() is not yet implemented.")
+end
+
+function module.setStencilPattern(row1, row2, row3, row4, row5, row6, row7, row8)
+  -- TODO: save this to graphics context
+  error("[ERR] playdate.graphics.setStencilPattern() is not yet implemented.")
+end
+
+function module.setStencilPattern(level, ditherType)
+  -- TODO: save this to graphics context
+  error("[ERR] playdate.graphics.setStencilPattern() is not yet implemented.")
+end
+
+function module.clearStencil()
+  -- TODO: save this to graphics context
+  error("[ERR] playdate.graphics.clearStencil() is not yet implemented.")
+end
+
+function module.clearStencilImage()
+  -- TODO: save this to graphics context
+  error("[ERR] playdate.graphics.clearStencilImage() is not yet implemented.")
 end
