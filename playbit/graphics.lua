@@ -4,9 +4,9 @@ local module = {}
 playbit.graphics = module
 
 -- #b0aea7
-module.COLOR_WHITE = { 176 / 255, 174 / 255, 167 / 255, 1 }
+module.COLOR_WHITE = { 214 / 255, 211 / 255, 203 / 255, 1 }
 -- #312f28
-module.COLOR_BLACK = { 49 / 255, 47 / 255, 40 / 255, 1 }
+module.COLOR_BLACK = { 49 / 255, 46 / 255, 40 / 255, 1 }
 module.MODE_KEY = "mode"
 
 module.colorWhite = module.COLOR_WHITE
