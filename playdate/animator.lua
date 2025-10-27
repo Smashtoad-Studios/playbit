@@ -12,11 +12,11 @@ module.__index = meta
 local function newNumberOrPointAnimator(type, startValue, endValue, easingFunction, startTimeOffset)
     local newAnimator = setmetatable({}, meta)
     newAnimator.type = type
-    newAnimator.startTimeOffset = startTimeOffset or 0
-    newAnimator.easingFunction = easingFunction or playdate.easingFunctions.linear
     newAnimator.startValue = startValue
     newAnimator.endValue = endValue
     newAnimator.change = endValue - startValue
+    newAnimator.easingFunction = easingFunction or playdate.easingFunctions.linear
+    newAnimator.startTimeOffset = startTimeOffset or 0
     if startTimeOffset ~= nil then
         print("[WARN] startTimeOffset for animator of type '" .. type .. "' is not implemented")
     end
@@ -26,11 +26,12 @@ end
 local function newGeometryAnimator(type, geom, easingFunction, startTimeOffset)
     local newAnimator = setmetatable({}, meta)
     newAnimator.type = type
+    newAnimator.geometry = geom
+    newAnimator.easingFunction = easingFunction or playdate.easingFunctions.linear
     newAnimator.startTimeOffset = startTimeOffset or 0
     if startTimeOffset ~= nil then
         print("[WARN] startTimeOffset for animator of type '" .. type .. "' is not implemented")
     end
-    newAnimator.geometry = geom
     return newAnimator
 end
 
