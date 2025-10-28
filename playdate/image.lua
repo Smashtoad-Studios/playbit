@@ -103,9 +103,8 @@ function meta:drawAnchored(x, y, ax, ay, flip)
 end
 
 function meta:drawCentered(x, y, flip)
-  print("[WARN] playdate.graphics.image:drawCentered() may not be exactly the same.")
-  local posX = x + math.floor(self.width / 2)
-  local posY = y + math.floor(self.height / 2)
+  local posX = x - math.floor(self.width / 2)
+  local posY = y - math.floor(self.height / 2)
   self:draw(posX, posY, flip)
 end
 
