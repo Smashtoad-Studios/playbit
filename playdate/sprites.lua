@@ -57,7 +57,7 @@ function module.new(imageOrTilemap)
     sprite.canUpdate = true
     sprite.drawMode = playdate.graphics.kDrawModeCopy
 
-    sprite:setScale(1, 1)
+    sprite:setRotation(0, 1)
     sprite:setCenter(0.5, 0.5)
     sprite:resetGroupMask()
     sprite:resetCollidesWithGroupsMask()
@@ -472,7 +472,7 @@ function meta:getScale()
 end
 
 function meta:setRotation(angle, scale, yScale)
-    self.angle = angle
+    self.rotation = angle
 
     if (scale) then
         self:setScale(scale, yScale)
@@ -480,7 +480,7 @@ function meta:setRotation(angle, scale, yScale)
 end
 
 function meta:getRotation()
-    return self.angle
+    return self.rotation
 end
 
 function meta:setVisible(flag)
@@ -527,7 +527,17 @@ function meta:draw()
             love.graphics.setStencilTest("greater", 0)
         end
 
-        self.image:draw(self:getCenterPoint())
+        -- always render pure white so its not tinted
+        local r, g, b = love.graphics.getColor()
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.draw(self.image.data,
+            self.x, self.y,
+            math.rad(self.rotation),
+            self.scaleX, self.scaleY,
+            self.width * self.centerX, self.height * self.centerY
+        )
+        love.graphics.setColor(r, g, b, 1)
+        playbit.graphics.updateContext()
 
         love.graphics.setStencilTest()
 
