@@ -544,7 +544,7 @@ function meta:draw()
             
             love.graphics.setShader()
             love.graphics.draw(playbit.graphics.canvas)
-            love.graphics.setCanvas(currentCanvas)
+            love.graphics.setCanvas({currentCanvas, stencil=true})
             love.graphics.setShader(playbit.graphics.shader)
             love.graphics.setColor(r, g, b, 1)
             
