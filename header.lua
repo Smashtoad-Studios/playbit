@@ -25,6 +25,7 @@ local framebuffer
 local windowWidth, windowHeight = playbit.graphics.getWindowSize()
 
 playbit.graphics.canvas:setFilter("nearest", "nearest")
+playbit.graphics.frameBufferCanvas:setFilter("nearest", "nearest")
 
 love.graphics.setDefaultFilter("nearest", "nearest")
 love.graphics.setLineWidth(1)
@@ -45,18 +46,11 @@ function love.draw()
   local canvasHeight = playbit.graphics.canvas:getHeight()
   if canvasWidth ~= newCanvasWidth or canvasHeight ~= newCanvasHeight then
     playbit.graphics.canvas = love.graphics.newCanvas(newCanvasWidth, newCanvasHeight)
-    framebuffer = love.graphics.newCanvas(newCanvasWidth, newCanvasHeight)
+    playbit.graphics.frameBufferCanvas = love.graphics.newCanvas(newCanvasWidth, newCanvasHeight)
+
+    playbit.graphics.shader:send("width", newCanvasWidth)
+    playbit.graphics.shader:send("height", newCanvasHeight)
   end
-
-  -- copy previous frame into framebuffer
-  love.graphics.setCanvas(framebuffer)
-  love.graphics.clear()
-  love.graphics.setColor(1, 1, 1, 1)
-  love.graphics.draw(playbit.graphics.canvas)
-  love.graphics.setCanvas()
-
-  -- send framebuffer to shader
-  playbit.graphics.shader:send("destTex", framebuffer)
 
   -- must be changed at start of frame - love2d doesn't allow changing window size with canvas active
   local newWindowWidth, newWindowHeight = playbit.graphics.getWindowSize()

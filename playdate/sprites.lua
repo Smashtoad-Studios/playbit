@@ -532,6 +532,26 @@ end
 
 function meta:draw()
     if self.visible and self.image then
+        
+        if self.drawMode == playdate.graphics.kDrawModeXOR or self.drawMode == playdate.graphics.kDrawModeNXOR then
+            -- copy previous frame into framebuffer
+            local r, g, b = love.graphics.getColor()
+            local currentCanvas = love.graphics.getCanvas()
+            
+            love.graphics.setCanvas(playbit.graphics.frameBufferCanvas)
+            love.graphics.clear()
+            love.graphics.setColor(1, 1, 1, 1)
+            
+            love.graphics.setShader()
+            love.graphics.draw(playbit.graphics.canvas)
+            love.graphics.setCanvas(currentCanvas)
+            love.graphics.setShader(playbit.graphics.shader)
+            love.graphics.setColor(r, g, b, 1)
+            
+            -- send framebuffer to shader
+            playbit.graphics.shader:send("destTex", playbit.graphics.frameBufferCanvas)
+        end
+        
         if self.drawMode then
             playbit.graphics.shader:send(playbit.graphics.MODE_KEY, self.drawMode)
         end

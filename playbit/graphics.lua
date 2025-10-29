@@ -21,6 +21,7 @@ module.activeFont = {}
 -- module.drawMode = playdate.graphics.kDrawModeCopy
 module.drawMode = 0
 module.canvas = love.graphics.newCanvas()
+module.frameBufferCanvas = love.graphics.newCanvas()
 module.contextStack = {}
 -- shared quad to reduce gc
 module.quad = love.graphics.newQuad(0, 0, 1, 1, 1, 1)
@@ -35,6 +36,9 @@ local canvasY = 0
 local windowWidth = 400
 local windowHeight = 240
 local fullscreen = false
+
+playbit.graphics.shader:send("width", canvasWidth)
+playbit.graphics.shader:send("height", canvasHeight)
 
 --- Sets the scale of the canvas.
 ---@param scale number
@@ -54,6 +58,9 @@ end
 function module.setCanvasSize(width, height)
   canvasWidth = width
   canvasHeight = height
+
+  playbit.graphics.shader:send("width", width)
+  playbit.graphics.shader:send("height", height)
 end
 
 --- Returns the current canvas size.
