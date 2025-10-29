@@ -559,6 +559,8 @@ end
 
 -- TODO-Playbit: This needs to be named update()
 function module.updateAll()
+    -- TODO: Should this always be white?
+    love.graphics.clear(playbit.graphics.COLOR_WHITE)
     for _, spr in ipairs(allSprites) do
         if spr.canUpdate then
             if spr.animator then
