@@ -85,7 +85,18 @@ end
 
 function meta:copy()
     local newSprite = module.new(self.image)
-    --TODO-Playbit: copy all properties?
+    newSprite:moveTo(self.x, self.y)
+    newSprite:setCenter(self.centerX, self.centerY)
+    newSprite:setRotation(self.rotation, self.scaleX, self.scaleY)
+    newSprite:setZIndex(self.zIndex)
+    newSprite:setVisible(self.visible)
+    newSprite:setImageDrawMode(self.drawMode)
+    newSprite:setUpdatesEnabled(self.canUpdate)
+
+    --TODO-Playbit: double check what properties are copied on Playdate
+    --TODO-Playbit: copy collision group properties?
+    --TODO-Playbit: copy animator?
+
     return newSprite
 end
 
@@ -95,8 +106,7 @@ function meta:setImage(image)
     if not image then
         self:setSize(0, 0)
     else
-        -- self:setSize(image:getSize()) -- TODO does that pass both params?
-        self.width, self.height = image:getSize()
+        self:setSize(image:getSize())
     end
 end
 
@@ -509,7 +519,7 @@ function meta:update()
 end
 
 function meta:setUpdatesEnabled(flag)
-    self.canUpdate = false
+    self.canUpdate = flag
 end
 
 function meta:updatesEnabled()
