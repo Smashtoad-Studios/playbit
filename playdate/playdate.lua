@@ -84,28 +84,19 @@ function inputHandlersModule.pop()
     return table.remove(inputHandlerStack, #inputHandlerStack)
 end
 
-local function processButtonInput(key, buttonState)
+local function processButtonInput(button, buttonState)
   -- TODO-Playbit: check down the stack of input handlers
   local currentInputHandler = inputHandlerStack[#inputHandlerStack]
   if currentInputHandler then
-    if not module._keyToButtonFuncName["kb_"..key] then
+    if not module._buttonFuncName[button] then
       return
     end
-    local buttonFuncName = module._keyToButtonFuncName["kb_"..key] .. buttonState
+    local buttonFuncName = module._buttonFuncName[button] .. buttonState
     if currentInputHandler.handler[buttonFuncName] then
       currentInputHandler.handler[buttonFuncName]()
     end
   end
 end
-
-module._buttonToKey = {
-  up = "kb_w",
-  down = "kb_s",
-  left = "kb_a",
-  right = "kb_d",
-  a = "kb_.",
-  b = "kb_,",
-}
 
 module.kButtonA = "a"
 module.kButtonB = "b"
@@ -114,13 +105,46 @@ module.kButtonDown = "down"
 module.kButtonLeft = "left"
 module.kButtonRight = "right"
 
-module._keyToButtonFuncName = {
-  [module._buttonToKey.up] = "upButton",
-  [module._buttonToKey.down] = "downButton",
-  [module._buttonToKey.left] = "leftButton",
-  [module._buttonToKey.right] = "rightButton",
-  [module._buttonToKey.a] = "AButton",
-  [module._buttonToKey.b] = "BButton",
+module._buttonToKb = {
+  [module.kButtonUp] = "kb_w",
+  [module.kButtonDown] = "kb_s",
+  [module.kButtonLeft] = "kb_a",
+  [module.kButtonRight] = "kb_d",
+  [module.kButtonA] = "kb_.",
+  [module.kButtonB] = "kb_,",
+}
+
+module._buttonToJs = {
+  [module.kButtonUp] = "js_dpup",
+  [module.kButtonDown] = "js_dpdown",
+  [module.kButtonLeft] = "js_dpleft",
+  [module.kButtonRight] = "js_dpright",
+  [module.kButtonA] = "js_a.",
+  [module.kButtonB] = "js_b,",
+}
+
+module._inputKeyToButton = {
+  ["kb_w"] = module.kButtonUp,
+  ["kb_s"] = module.kButtonDown,
+  ["kb_a"] = module.kButtonLeft,
+  ["kb_d"] = module.kButtonRight,
+  ["kb_."] = module.kButtonA,
+  ["kb_,"] = module.kButtonB,
+  ["js_a"] = module.kButtonA,
+  ["js_b"] = module.kButtonB,
+  ["js_dpup"] = module.kButtonUp,
+  ["js_dpdown"] = module.kButtonDown,
+  ["js_dpleft"] = module.kButtonLeft,
+  ["js_dpright"] = module.kButtonRight,
+}
+
+module._buttonFuncName = {
+  [module.kButtonUp] = "upButton",
+  [module.kButtonDown] = "downButton",
+  [module.kButtonLeft] = "leftButton",
+  [module.kButtonRight] = "rightButton",
+  [module.kButtonA] = "AButton",
+  [module.kButtonB] = "BButton",
 }
 
 module._buttonStates =
@@ -138,38 +162,38 @@ local JUST_RELEASED = 3
 local inputStates = {}
 
 function module.buttonIsPressed(button)
-  local key = module._buttonToKey[button]
-  if not inputStates[key] then
+  local inputKey = lastActiveJoystick and module._buttonToJs[button] or module._buttonToKb[button]
+  if not inputStates[inputKey] then
     -- no entry, assume no input
     return false
   end
 
-  return inputStates[key] == JUST_PRESSED or inputStates[key] == PRESSED
+  return inputStates[inputKey] == JUST_PRESSED or inputStates[inputKey] == PRESSED
 end
 
 function module.buttonJustPressed(button)
-  local key = module._buttonToKey[button]
-  if not inputStates[key] then
+  local inputKey = lastActiveJoystick and module._buttonToJs[button] or module._buttonToKb[button]
+  if not inputStates[inputKey] then
     -- no entry, assume no input
     return false
   end
 
-  return inputStates[key] == JUST_PRESSED
+  return inputStates[inputKey] == JUST_PRESSED
 end
 
 function module.buttonJustReleased(button)
-  local key = module._buttonToKey[button]
-  if not inputStates[key] then
+  local inputKey = lastActiveJoystick and module._buttonToJs[button] or module._buttonToKb[button]
+  if not inputStates[inputKey] then
     -- no entry, assume no input
     return false
   end
 
-  return inputStates[key] == JUST_RELEASED
+  return inputStates[inputKey] == JUST_RELEASED
 end
 
 function module.getButtonState(button)
-  local key = module._buttonToKey[button]
-  local value = inputStates[key]
+  local inputKey = lastActiveJoystick and module._buttonToJs[button] or module._buttonToKb[button]
+  local value = inputStates[inputKey]
   return value == PRESSED, value == PRESSED, value == JUST_RELEASED
 end
 
@@ -180,8 +204,8 @@ function module.isCrankDocked()
 
   -- TODO: is basing dock state on if stick is non-zero a bad assumption here?
   -- will other games want a dedicated dock/undock button?
-  local x = math.abs(lastActiveJoystick:getAxis(3))
-  local y = math.abs(lastActiveJoystick:getAxis(4))
+  local x = math.abs(lastActiveJoystick:getGamepadAxis("leftx"))
+  local y = math.abs(lastActiveJoystick:getGamepadAxis("lefty"))
   local len = math.sqrt(x * x + y * y)
   -- TODO: deadzone sensitivity?
   if len < 0.1 then
@@ -209,10 +233,12 @@ function module.getCrankPosition()
     return crankPos
   end
 
-  local x = lastActiveJoystick:getAxis(3)
-  local y = lastActiveJoystick:getAxis(4)
 
-  local degrees = math.deg(math.atan2(-y, x))
+  local x = lastActiveJoystick:getGamepadAxis("leftx")
+  local y = lastActiveJoystick:getGamepadAxis("lefty")
+
+  local degrees = math.deg(math.atan2(x, -y))
+
   if degrees < 0 then
     return degrees + 360
   end
@@ -240,12 +266,16 @@ end
 
 function love.gamepadpressed(joystick, gamepadButton)
   lastActiveJoystick = joystick
-  inputStates["js_"..gamepadButton] = JUST_PRESSED
+  local inputKey = "js_"..gamepadButton
+  inputStates[inputKey] = JUST_PRESSED
+  processButtonInput(module._inputKeyToButton[inputKey], module._buttonStates.down)
 end
 
 function love.gamepadreleased(joystick, gamepadButton)
   lastActiveJoystick = joystick
-  inputStates["js_"..gamepadButton] = JUST_RELEASED
+  local inputKey = "js_"..gamepadButton
+  inputStates[inputKey] = JUST_RELEASED
+  processButtonInput(module._inputKeyToButton[inputKey], module._buttonStates.up)
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
@@ -333,7 +363,8 @@ local supportedCallbackKeys = {
 }
 
 function love.keypressed(key)
-  inputStates["kb_"..key] = JUST_PRESSED
+  local inputKey = "kb_"..key
+  inputStates[inputKey] = JUST_PRESSED
 
   --[[ Playdate only has a limited range of supported keys, so Playbit exposes the separate
   `playbit.keyPressed` handler so that it can be used to listen to any keypress under love2d. ]]--
@@ -346,11 +377,12 @@ function love.keypressed(key)
     end
   end
 
-  processButtonInput(key, module._buttonStates.down)
+  processButtonInput(module._inputKeyToButton[inputKey], module._buttonStates.down)
 end
 
-function love.keyreleased(key)  
-  inputStates["kb_"..key] = JUST_RELEASED
+function love.keyreleased(key)
+  local inputKey = "kb_"..key
+  inputStates[inputKey] = JUST_RELEASED
 
   if playbit.keyReleased then
     playbit.keyReleased(key)
@@ -362,19 +394,46 @@ function love.keyreleased(key)
     end
   end
 
-  processButtonInput(key, module._buttonStates.up)
+  processButtonInput(module._inputKeyToButton[inputKey], module._buttonStates.up)
 end
 
 function module.updateInput()
   -- only update keys that are mapped
-  for k,v in pairs(module._buttonToKey) do
+  for k,v in pairs(module._buttonToKb) do
     if inputStates[v] == JUST_PRESSED then
       inputStates[v] = PRESSED
     elseif inputStates[v] == JUST_RELEASED then
       inputStates[v] = NONE
     end
   end
-  lastCrankPos = crankPos
+
+  local currentCrankPos = crankPos
+
+  -- update the crankPos for the next tick
+  if lastActiveJoystick then
+    local x = lastActiveJoystick:getGamepadAxis("leftx")
+    local y = lastActiveJoystick:getGamepadAxis("lefty")
+
+    local degrees = math.deg(math.atan2(x, -y))
+
+    if degrees < 0 then
+      crankPos = degrees + 360
+    else
+      crankPos = degrees
+    end
+
+    if crankPos ~= lastCrankPos then
+      local diff = crankPos - lastCrankPos
+      local currentInputHandler = inputHandlerStack[#inputHandlerStack]
+      if currentInputHandler then
+        if currentInputHandler.handler.cranked then
+          currentInputHandler.handler.cranked(diff, diff)
+        end
+      end
+    end
+  end
+
+  lastCrankPos = currentCrankPos
 end
 
 -- ██╗     ██╗   ██╗ █████╗ 

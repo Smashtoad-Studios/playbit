@@ -160,6 +160,8 @@ function love.run()
 
 			if love.draw then love.draw() end
 
+      -- Clear canvas before presenting
+      love.graphics.setCanvas() 
 			love.graphics.present()
 		end
 
