@@ -57,7 +57,7 @@ function module.new(imageOrTilemap)
     sprite.canUpdate = true
     sprite.drawMode = playdate.graphics.kDrawModeCopy
 
-    sprite:setScale(1, 1)
+    sprite:setRotation(0, 1)
     sprite:setCenter(0.5, 0.5)
     sprite:resetGroupMask()
     sprite:resetCollidesWithGroupsMask()
@@ -85,7 +85,18 @@ end
 
 function meta:copy()
     local newSprite = module.new(self.image)
-    --TODO-Playbit: copy all properties?
+    newSprite:moveTo(self.x, self.y)
+    newSprite:setCenter(self.centerX, self.centerY)
+    newSprite:setRotation(self.rotation, self.scaleX, self.scaleY)
+    newSprite:setZIndex(self.zIndex)
+    newSprite:setVisible(self.visible)
+    newSprite:setImageDrawMode(self.drawMode)
+    newSprite:setUpdatesEnabled(self.canUpdate)
+
+    --TODO-Playbit: double check what properties are copied on Playdate
+    --TODO-Playbit: copy collision group properties?
+    --TODO-Playbit: copy animator?
+
     return newSprite
 end
 
@@ -95,8 +106,7 @@ function meta:setImage(image)
     if not image then
         self:setSize(0, 0)
     else
-        -- self:setSize(image:getSize()) -- TODO does that pass both params?
-        self.width, self.height = image:getSize()
+        self:setSize(image:getSize())
     end
 end
 
@@ -472,7 +482,7 @@ function meta:getScale()
 end
 
 function meta:setRotation(angle, scale, yScale)
-    self.angle = angle
+    self.rotation = angle
 
     if (scale) then
         self:setScale(scale, yScale)
@@ -480,7 +490,7 @@ function meta:setRotation(angle, scale, yScale)
 end
 
 function meta:getRotation()
-    return self.angle
+    return self.rotation
 end
 
 function meta:setImageDrawMode(mode)
@@ -513,7 +523,7 @@ function meta:update()
 end
 
 function meta:setUpdatesEnabled(flag)
-    self.canUpdate = false
+    self.canUpdate = flag
 end
 
 function meta:updatesEnabled()
@@ -531,7 +541,17 @@ function meta:draw()
             love.graphics.setStencilTest("greater", 0)
         end
 
-        self.image:draw(self:getCenterPoint())
+        -- always render pure white so its not tinted
+        local r, g, b = love.graphics.getColor()
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.draw(self.image.data,
+            self.x, self.y,
+            math.rad(self.rotation),
+            self.scaleX, self.scaleY,
+            self.width * self.centerX, self.height * self.centerY
+        )
+        love.graphics.setColor(r, g, b, 1)
+        playbit.graphics.updateContext()
 
         love.graphics.setStencilTest()
 
@@ -543,6 +563,8 @@ end
 
 -- TODO-Playbit: This needs to be named update()
 function module.updateAll()
+    -- TODO: Should this always be white?
+    love.graphics.clear(playbit.graphics.COLOR_WHITE)
     for _, spr in ipairs(allSprites) do
         if spr.canUpdate then
             if spr.animator then

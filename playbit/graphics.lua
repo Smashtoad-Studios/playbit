@@ -4,9 +4,9 @@ local module = {}
 playbit.graphics = module
 
 -- #b0aea7
-module.COLOR_WHITE = { 176 / 255, 174 / 255, 167 / 255, 1 }
+module.COLOR_WHITE = { 214 / 255, 211 / 255, 203 / 255, 1 }
 -- #312f28
-module.COLOR_BLACK = { 49 / 255, 47 / 255, 40 / 255, 1 }
+module.COLOR_BLACK = { 49 / 255, 46 / 255, 40 / 255, 1 }
 module.MODE_KEY = "mode"
 
 module.colorWhite = module.COLOR_WHITE
@@ -146,9 +146,12 @@ function module.updateContext()
   local imageData = activeContext._canvas:newImageData()
   love.graphics.setCanvas({activeContext._canvas, stencil=true})
 
-  -- update image
-  activeContext.data:replacePixels(imageData)
-  -- also update the raw image data so we can duplcate the image as needed
-  activeContext.imgData = imageData
+  -- check if active context is an image
+  if activeContext.data then
+    -- update image
+    activeContext.data:replacePixels(imageData)
+    -- also update the raw image data so we can duplcate the image as needed
+    activeContext.imgData = imageData
+  end
 end
 !end

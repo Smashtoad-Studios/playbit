@@ -58,8 +58,16 @@ function module.new(path, cellsWide, cellsSize)
     local maxHeight = 0
 
     for i = 1, #actualFilenames, 1 do
-      local actualPath = folder.."/"..actualFilenames[i]
-      local img = playdate.graphics.image.new(actualPath..".png")
+      local actualPath = folder.."/"..actualFilenames[i]..".png"
+
+      local matches = string.gmatch(actualPath, "%-(%d+)%.png")
+      local frameNumber = tonumber(matches())
+      
+      if not frameNumber then
+        error("[ERR] Failed to parse frame number from imagetable file: " .. actualPath)
+      end
+
+      local img = playdate.graphics.image.new(actualPath)
       local w, h = img:getSize()
 
       if w > maxWidth then
@@ -68,7 +76,7 @@ function module.new(path, cellsWide, cellsSize)
       if h > maxHeight then
         maxHeight = h
       end
-      images[#images + 1] = img
+      images[frameNumber] = img
     end
 
     -- TODO-Playbit: is this the right way to calculate frame width/height?
