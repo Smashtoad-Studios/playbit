@@ -140,12 +140,10 @@ function module.setImageDrawMode(mode)
     playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeFillWhite)
   elseif mode == module.kDrawModeFillBlack or mode == "fillBlack" then
     playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeFillBlack)
-  -- elseif mode == module.kDrawModeXOR or mode == "XOR" then
-  --   print("[WARN] Draw mode 'XOR' is not yet implemented. Draws as inverted.")
-  --   playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeXOR)
-  -- elseif mode == module.kDrawModeNXOR or mode == "NXOR" then
-  --   print("[WARN] Draw mode 'NXOR' is not yet implemented. Draws as inverted.")
-  --   playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeNXOR)
+  elseif mode == module.kDrawModeXOR or mode == "XOR" then
+    playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeXOR)
+  elseif mode == module.kDrawModeNXOR or mode == "NXOR" then
+    playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeNXOR)
   elseif mode == module.kDrawModeInverted or mode == "inverted" then
     playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeInverted)
   else
