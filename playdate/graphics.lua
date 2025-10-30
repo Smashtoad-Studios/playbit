@@ -41,15 +41,20 @@ kTextAlignment = {
 }
 
 function module.setDrawOffset(x, y)
-  playbit.graphics.drawOffset.x = x
-  playbit.graphics.drawOffset.y = y
-  love.graphics.pop()
+  playbit.graphics.activeContext.drawOffset = {
+    x = x,
+    y = y
+  }
+  if love.graphics.getStackDepth() > 0 then
+    love.graphics.pop()
+  end
+  -- TODO this causes problems with nested image contexts possibly due to draw offset when drawing the image to the canvas
   love.graphics.push()
   love.graphics.translate(x, y)
 end
 
 function module.getDrawOffset()
-  return playbit.graphics.drawOffset.x, playbit.graphics.drawOffset.y
+  return playbit.graphics.activeContext.drawOffset.x, playbit.graphics.activeContext.drawOffset.y
 end
 
 function module.setBackgroundColor(color)
@@ -150,7 +155,7 @@ function module.setImageDrawMode(mode)
 end
 
 function module.getImageDrawMode()
-  error("playdate.graphics.getImageDrawMode() is not implemented")
+  return playbit.graphics.activeContext.drawMode
 end
 
 function module.drawCircleAtPoint(x, y, radius)
@@ -441,6 +446,7 @@ local function applyContext(context)
   module.setStrokeLocation(context.strokeLocation)
   module.setLineCapStyle(context.lineCapStyle)
   module.setFontFamily(context.fontFamily)
+  module.setDrawOffset(context.drawOffset.x, context.drawOffset.y)
 
   -- setting color nils out pattern / ditherPattern
   if context.color ~= nil then
@@ -500,12 +506,11 @@ function module.pushContext(image)
       lineWidth = 1,
       lineCapStyle = module.kLineCapStyleButt,
       strokeLocation = module.kStrokeCentered,
-      drawOffset = {x = 0, y = 0}, -- carries into the new context
+      drawOffset = {x = 0, y = 0},
       ditherPattern = nil,
       ditherAlpha = 1.0,
       pattern = nil,
       fontFamily = {},
-      font = nil,
       clipRect = nil,
       stencilImage = nil,
       tileStencilImage = false,
