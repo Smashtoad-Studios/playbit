@@ -97,10 +97,10 @@ end
 function meta:drawTextAligned(str, x, y, alignment, leadingAdjustment)
   @@ASSERT(leadingAdjustment == nil, "[ERR] Parameter leadingAdjustment is not yet implemented.")
   local width = self:getTextWidth(str)
-  if alignment == 1 then
+  if alignment == kTextAlignment.right then
     -- right
     x = x - width
-  elseif alignment == 2 then
+  elseif alignment == kTextAlignment.center then
     -- center
     x = x - width * 0.5  
   end

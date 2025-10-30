@@ -27,12 +27,11 @@ local windowWidth, windowHeight = playbit.graphics.getWindowSize()
 playbit.graphics.canvas:setFilter("nearest", "nearest")
 playbit.graphics.frameBufferCanvas:setFilter("nearest", "nearest")
 
-love.graphics.setDefaultFilter("nearest", "nearest")
-love.graphics.setLineWidth(1)
-love.graphics.setLineStyle("rough")
+-- initialize the default context
+playdate.graphics.pushContext()
 
-playdate.graphics.setBackgroundColor(playdate.graphics.kColorWhite)
-playdate.graphics.setColor(playdate.graphics.kColorBlack)
+love.graphics.setDefaultFilter("nearest", "nearest")
+love.graphics.setLineStyle("rough")
 
 math.randomseed(os.time())
 
@@ -87,7 +86,7 @@ function love.draw()
   end
 
   -- love requires that this is set every loop
-  love.graphics.setFont(playbit.graphics.activeFont.data)
+  love.graphics.setFont(playbit.graphics.activeContext.fontFamily[playdate.graphics.font.kVariantNormal].data)
 
   -- push main transform for draw offset
   love.graphics.push()
@@ -167,6 +166,8 @@ function love.run()
 
 			if love.draw then love.draw() end
 
+      -- Clear canvas before presenting
+      love.graphics.setCanvas() 
 			love.graphics.present()
 		end
 

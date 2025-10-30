@@ -3,6 +3,7 @@ playdate.display = module
 
 function module.setOffset(x, y)
     print("[WARN] playdate.display.setOffset() is not yet implemented.")
+    -- Has no effect when not in the base graphics context
 end
 
 function module.setRefreshRate(rate)

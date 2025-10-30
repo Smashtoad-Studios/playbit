@@ -576,7 +576,7 @@ function meta:draw()
         love.graphics.setStencilTest()
 
         if self.drawMode then
-            playbit.graphics.shader:send(playbit.graphics.MODE_KEY, playbit.graphics.drawMode)
+            playbit.graphics.shader:send(playbit.graphics.MODE_KEY, playbit.graphics.activeContext.drawMode)
         end
     end
 end
