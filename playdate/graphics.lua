@@ -548,6 +548,11 @@ end
 function module.setDitherPattern(alpha, ditherType)
   -- TODO setting the color doesn't seem right, and it doesn't match the Playdate docs, but it matches the Playdate SDK behavior apart from at 0 opacity when color is white
   module.setColor(playdate.graphics.kColorBlack)
+
+  if ditherType == nil then
+    ditherType = playdate.graphics.image.kDitherTypeBayer8x8
+  end
+
   playbit.graphics.activeContext.pattern = nil
   playbit.graphics.activeContext.ditherPattern = ditherType
   playbit.graphics.activeContext.ditherAlpha = alpha
