@@ -7,6 +7,19 @@ local meta = {}
 meta.__index = meta
 module.__index = meta
 
+-- define these to be the same as the Playbit constants
+module.kDitherTypeNone = playbit.graphics.kDitherTypeNone
+module.kDitherTypeDiagonalLine = playbit.graphics.kDitherTypeDiagonalLine
+module.kDitherTypeVerticalLine = playbit.graphics.kDitherTypeVerticalLine
+module.kDitherTypeHorizontalLine = playbit.graphics.kDitherTypeHorizontalLine
+module.kDitherTypeScreen = playbit.graphics.kDitherTypeScreen
+module.kDitherTypeBayer2x2 = playbit.graphics.kDitherTypeBayer2x2
+module.kDitherTypeBayer4x4 = playbit.graphics.kDitherTypeBayer4x4
+module.kDitherTypeBayer8x8 = playbit.graphics.kDitherTypeBayer8x8
+module.kDitherTypeFloydSteinberg = playbit.graphics.kDitherTypeFloydSteinberg
+module.kDitherTypeBurkes = playbit.graphics.kDitherTypeBurkes
+module.kDitherTypeAtkinson = playbit.graphics.kDitherTypeAtkinson
+
 function module.new(widthOrPath, height, bgColor)
   -- @@ASSERT(bgcolor == nil, "[ERR] Parameter bgcolor is not yet implemented.")
   local img = setmetatable({}, meta)
@@ -149,6 +162,10 @@ function meta:rotatedImage(angle, scale, yscale)
 end
 
 function meta:drawScaled(x, y, scale, yscale)
+  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
+    playbit.graphics.updateFramebufferCanvas()
+  end
+  
   yscale = yscale or scale
 
   -- always render pure white so its not tinted
@@ -208,6 +225,10 @@ end
 
 -- TODO: handle overloaded signature (rect, flip)
 function meta:drawTiled(x, y, width, height, flip)
+  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
+    playbit.graphics.updateFramebufferCanvas()
+  end
+
   -- always render pure white so its not tinted
   local r, g, b = love.graphics.getColor()
   love.graphics.setColor(1, 1, 1, 1)

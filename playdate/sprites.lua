@@ -534,22 +534,7 @@ function meta:draw()
     if self.visible and self.image then
         
         if self.drawMode == playdate.graphics.kDrawModeXOR or self.drawMode == playdate.graphics.kDrawModeNXOR then
-            -- copy previous frame into framebuffer
-            local r, g, b = love.graphics.getColor()
-            local currentCanvas = love.graphics.getCanvas()
-            
-            love.graphics.setCanvas(playbit.graphics.frameBufferCanvas)
-            love.graphics.clear()
-            love.graphics.setColor(1, 1, 1, 1)
-            
-            love.graphics.setShader()
-            love.graphics.draw(playbit.graphics.canvas)
-            love.graphics.setCanvas({currentCanvas, stencil=true})
-            love.graphics.setShader(playbit.graphics.shader)
-            love.graphics.setColor(r, g, b, 1)
-            
-            -- send framebuffer to shader
-            playbit.graphics.shader:send("destTex", playbit.graphics.frameBufferCanvas)
+            playbit.graphics.updateFramebufferCanvas()
         end
         
         if self.drawMode then
@@ -564,6 +549,8 @@ function meta:draw()
         -- always render pure white so its not tinted
         local r, g, b = love.graphics.getColor()
         love.graphics.setColor(1, 1, 1, 1)
+
+        -- TODO check to see if sprites are being drawed at fractional pixel values. If so, round them.
         love.graphics.draw(self.image.data,
             self.x, self.y,
             math.rad(self.rotation),
