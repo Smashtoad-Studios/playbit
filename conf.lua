@@ -5,4 +5,6 @@ function love.conf(t)
     t.window.height = 240
     t.window.msaa = false
     t.window.usedpiscale = false
+    t.window.vsync = true
+    t.window.resizable = true
 end
