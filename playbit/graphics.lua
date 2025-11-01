@@ -16,6 +16,7 @@ module.shader = love.graphics.newShader("playdate/shader")
 module.drawOffset = { x = 0, y = 0}
 
 module.canvas = love.graphics.newCanvas()
+module.frameBufferCanvas = love.graphics.newCanvas()
 
 module.activeContext = nil
 module.contextStack = {}
@@ -31,6 +32,9 @@ local canvasX = 0
 local canvasY = 0
 local windowWidth, windowHeight = love.graphics.getDimensions()
 local fullscreen = false
+
+playbit.graphics.shader:send("width", canvasWidth)
+playbit.graphics.shader:send("height", canvasHeight)
 
 --- Sets the scale of the canvas.
 ---@param scale number
@@ -50,6 +54,9 @@ end
 function module.setCanvasSize(width, height)
   canvasWidth = width
   canvasHeight = height
+
+  playbit.graphics.shader:send("width", width)
+  playbit.graphics.shader:send("height", height)
 end
 
 --- Returns the current canvas size.

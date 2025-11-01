@@ -4,10 +4,13 @@
 #pragma language glsl3
 
 extern int mode;
+extern int width;
+extern int height;
 extern bool debugDraw;
 extern int pattern[64];
 extern vec4 white = vec4(214.0f / 255.0f, 211.0f / 255.0f, 203.0f / 255.0f, 1);
 extern vec4 black = vec4( 49.0f / 255.0f,  46.0f / 255.0f,  40.0f / 255.0f, 1);
+extern Image destTex;
 
 const vec4 TRANSPARENT =  vec4(0, 0, 0, 0);
 const vec4 DEBUG =        vec4(1, 0, 0, 0.5); // used when rendering via playdate.debugDraw()
@@ -25,6 +28,7 @@ vec3 rgb2hsv(vec3 c)
 
 vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
 {
+  vec4 destColor = Texel(destTex, tex_coords);
   vec4 outputcolor = Texel(tex, tex_coords) * color;
   if (mode == 1)                  // ---------- "whiteTransparent"
   {
@@ -93,14 +97,60 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
       return TRANSPARENT;
     }
   }
-  // else if (mode == 5)                  // ---------- "XOR"
-  // {
-  //   // TODO: XOR drawmode
-  // }
-  // else if (mode == 6)                  // ---------- "NXOR"
-  // {
-  //   // TODO: NXOR drawmode
-  // }
+  // kDrawModeXOR
+  else if (mode == 5)
+  {
+    if (outputcolor.a > 0)
+    {
+      vec2 normalizedCoords = screen_coords / vec2(width, height);
+      vec4 destColor = Texel(destTex, normalizedCoords);
+
+      bool isWhiteSrc = rgb2hsv(vec3(outputcolor)).z < 0.45;
+      bool isWhiteDst = rgb2hsv(vec3(destColor)).z < 0.45;
+
+      bool xorResult = isWhiteSrc != isWhiteDst;
+
+      if (debugDraw)
+      {
+        return DEBUG;
+      }
+      else
+      {
+        return xorResult ? white : black;
+      }
+    }
+    else
+    {
+      return TRANSPARENT;
+    }
+  }
+  // kDrawModeNXOR
+  else if (mode == 6)
+  {
+    if (outputcolor.a > 0)
+    {
+      vec2 normalizedCoords = screen_coords / vec2(width, height);
+      vec4 destColor = Texel(destTex, normalizedCoords);
+
+      bool isWhiteSrc = rgb2hsv(vec3(outputcolor)).z < 0.45;
+      bool isWhiteDst = rgb2hsv(vec3(destColor)).z < 0.45;
+
+      bool nxorResult = isWhiteSrc == isWhiteDst;
+
+      if (debugDraw)
+      {
+        return DEBUG;
+      }
+      else
+      {
+        return nxorResult ? white : black;
+      }
+    }
+    else
+    {
+      return TRANSPARENT;
+    }
+  }
   else if (mode == 7)                  // ---------- "inverted"
   {
     if (outputcolor.a > 0)
