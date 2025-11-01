@@ -38,6 +38,8 @@ math.randomseed(os.time())
 local font = playdate.graphics.font.new("fonts/Phozon/Phozon")
 playdate.graphics.setFont(font)
 
+playbit.graphics.setWindowSize(windowWidth, windowHeight)
+
 function love.draw()
   -- must be changed at start of frame when canvas is not active
   local newCanvasWidth, newCanvasHeight = playbit.graphics.getCanvasSize()
@@ -127,6 +129,10 @@ function love.draw()
   -- update emulated input
   playdate.updateInput()
   playdate.graphics.animation.loop.update()
+end
+
+function love.resize(w, h)
+  playbit.graphics.setWindowSize(w, h)
 end
 
 function love.run()

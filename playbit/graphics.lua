@@ -85,12 +85,10 @@ module.ditherThresholds = {
 }
 
 local canvasScale = 1
-local canvasWidth = 400
-local canvasHeight = 240
+local canvasWidth, canvasHeight = love.graphics.getDimensions()
 local canvasX = 0
 local canvasY = 0
-local windowWidth = 400
-local windowHeight = 240
+local windowWidth, windowHeight = love.graphics.getDimensions()
 local fullscreen = false
 
 playbit.graphics.shader:send("width", canvasWidth)
@@ -147,6 +145,14 @@ end
 function module.setWindowSize(width, height)
   windowWidth = width
   windowHeight = height
+
+  canvasScale = math.min(windowWidth / canvasWidth, windowHeight / canvasHeight)
+
+  canvasX = (windowWidth - canvasWidth * canvasScale) / 2
+  canvasY = (windowHeight - canvasHeight * canvasScale) / 2
+
+  playbit.graphics.shader:send("width", width)
+  playbit.graphics.shader:send("height", height)
 end
 
 --- Returns the current window size.
