@@ -30,22 +30,6 @@ function module.newFamily(fontPaths)
   return fontFamily
 end
 
-function module.setFont(font, variant)
-  error("[ERR] playdate.graphics.font.setFont() is not yet implemented.")
-end
-
-function module.getFont(variant)
-  error("[ERR] playdate.graphics.font.getFont() is not yet implemented.")
-end
-
-function module.setFontTracking(pixels)
-  error("[ERR] playdate.graphics.font.setFontTracking() is not yet implemented.")
-end
-
-function module.getSystemFont(variant)
-  error("[ERR] playdate.graphics.font.getSystemFont() is not yet implemented.")
-end
-
 function meta:getTextWidth(str)
   --[[ 
     NOTE: width returned will not be the same as on Playdate
@@ -88,7 +72,9 @@ function meta:drawText(str, x, y, width, height, leadingAdjustment, wrapMode, al
   @@ASSERT(alignment == nil, "[ERR] Parameter alignment is not yet implemented.")
   local currentFont = love.graphics.getFont()
   love.graphics.setFont(self.data)
+  playbit.graphics.shader:send("usePattern", false)
   love.graphics.print(str, x, y)
+  playbit.graphics.shader:send("usePattern", true)
   love.graphics.setFont(currentFont)
   playbit.graphics.updateContext()
 end
@@ -108,7 +94,9 @@ function meta:drawTextAligned(str, x, y, alignment, leadingAdjustment)
   
   local currentFont = love.graphics.getFont()
   love.graphics.setFont(self.data)
+  playbit.graphics.shader:send("usePattern", false)
   love.graphics.print(str, x, y)
+  playbit.graphics.shader:send("usePattern", true)
   love.graphics.setFont(currentFont)
   playbit.graphics.updateContext()
 end

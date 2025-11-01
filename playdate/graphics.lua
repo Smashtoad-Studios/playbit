@@ -368,6 +368,14 @@ function module.getFont(variant)
   end
 end
 
+function module.getSystemFont(variant)
+  error("[ERR] playdate.graphics.getSystemFont() is not yet implemented.")
+end
+
+function module.setFontTracking(pixels)
+  error("[ERR] playdate.graphics.setFontTracking() is not yet implemented.")
+end
+
 function module.getTextSize(str, fontFamily, leadingAdjustment)
   @@ASSERT(fontFamily == nil, "[ERR] Parameter fontFamily is not yet implemented.")
   @@ASSERT(leadingAdjustment == nil, "[ERR] Parameter leadingAdjustment is not yet implemented.")

@@ -7,6 +7,7 @@ extern int mode;
 extern int width;
 extern int height;
 extern bool debugDraw;
+extern bool usePattern = true;
 extern int pattern[64] = int[64](
     1, 1, 1, 1, 1, 1, 1, 1,
     1, 1, 1, 1, 1, 1, 1, 1,
@@ -42,7 +43,7 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
   int x = int(mod(screen_coords.x, 8.0));
   int y = int(mod(screen_coords.y, 8.0));
   // Use "x" and "y" multiplied by "w" to index into the pattern array
-  if (pattern[x + y * 8] == 0) {
+  if (usePattern && pattern[x + y * 8] == 0) {
     return TRANSPARENT;
   }
 
