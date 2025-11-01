@@ -72,7 +72,7 @@ function module.clearPattern()
   module.setPattern({0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff})
 end
 
-function module.setColor(color)
+function module.setColor(color, keepPattern)
   -- TODO: save this to graphics context
   @@ASSERT(color == playdate.graphics.kColorBlack or color == playdate.graphics.kColorWhite, "Only values of 0 (black) or 1 (white) are supported.")
   playbit.graphics.activeContext.color = color
@@ -80,7 +80,9 @@ function module.setColor(color)
   local c = color == playdate.graphics.kColorWhite and playbit.graphics.colorWhite or playbit.graphics.colorBlack
   love.graphics.setColor(c[1], c[2], c[3], c[4])
   -- reset pattern, as per PD behavior
-  module.clearPattern()
+  if not keepPattern then
+    module.clearPattern()
+  end
 end
 
 function module.getColor()
@@ -89,7 +91,7 @@ end
 
 function module.setPattern(pattern)
   playbit.graphics.activeContext.pattern = pattern
-  playbit.graphics.activeContext.ditherPattern = nil
+  playbit.graphics.activeContext.ditherType = nil
 
   -- bitshifting does not work in shaders, so do it here in Lua
   local pixels = {}
@@ -464,10 +466,10 @@ local function applyContext(context)
   module.setDrawOffset(context.drawOffset.x, context.drawOffset.y)
 
   if context.color ~= nil then
-    module.setColor(context.color)
+    module.setColor(context.color, true)
   end
-  if context.ditherPattern ~= nil then
-    module.setDitherPattern(context.ditherAlpha, context.ditherPattern)
+  if context.ditherType ~= nil then
+    module.setDitherPattern(context.ditherAlpha, context.ditherType)
   elseif context.pattern ~= nil then
     module.setPattern(context.pattern)
   else
@@ -554,15 +556,12 @@ function module.popContext()
 end
 
 function module.setDitherPattern(alpha, ditherType)
-  -- TODO setting the color doesn't seem right, and it doesn't match the Playdate docs, but it matches the Playdate SDK behavior apart from at 0 opacity when color is white
-  module.setColor(playdate.graphics.kColorBlack)
-
   if ditherType == nil then
     ditherType = playdate.graphics.image.kDitherTypeBayer8x8
   end
 
   playbit.graphics.activeContext.pattern = nil
-  playbit.graphics.activeContext.ditherPattern = ditherType
+  playbit.graphics.activeContext.ditherType = ditherType
   playbit.graphics.activeContext.ditherAlpha = alpha
 
   if ditherType == playdate.graphics.image.kDitherTypeNone then
