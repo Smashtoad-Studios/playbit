@@ -248,8 +248,17 @@ function meta:resetCollidesWithGroupsMask()
 end
 
 function meta:setClipRect(xOrRect, y, width, height)
-    -- TODO-Playbit: Implement clip rect
-    print("[WARN] playdate.graphics.sprite setClipRect() does not yet have any effect.")
+    @@ASSERT(y ~= nil, "[ERR] playdate.graphics.sprite setClipRect() is not implemented for rect parameter")
+    self.clipRect = {
+        x = xOrRect,
+        y = y,
+        width = width,
+        height = height
+    }
+end
+
+function meta:clearClipRect(xOrRect, y, width, height)
+    self.clipRect = nil
 end
 
 function meta:clearCollideRect()
@@ -550,6 +559,12 @@ function meta:draw()
         local r, g, b = love.graphics.getColor()
         love.graphics.setColor(1, 1, 1, 1)
 
+        -- set the clip rect
+        local prevScissorX, prevScissorY, prevScissorWidth, prevScissorHeight = love.graphics.getScissor()
+        if self.clipRect ~= nil then
+            love.graphics.setScissor(self.clipRect.x, -self.clipRect.y, self.clipRect.width, self.clipRect.height)
+        end
+
         -- TODO check to see if sprites are being drawed at fractional pixel values. If so, round them.
         love.graphics.draw(self.image.data,
             self.x, self.y,
@@ -557,6 +572,12 @@ function meta:draw()
             self.scaleX, self.scaleY,
             self.width * self.centerX, self.height * self.centerY
         )
+
+        -- clear the clip rect
+        if self.clipRect ~= nil then
+            love.graphics.setScissor(prevScissorX, prevScissorY, prevScissorWidth, prevScissorHeight)
+        end
+
         love.graphics.setColor(r, g, b, 1)
         playbit.graphics.updateContext()
 
