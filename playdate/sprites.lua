@@ -19,10 +19,10 @@ local mask_shader = love.graphics.newShader[[
    }
 ]]
 
-local function stencilImageFunction(img)
-   love.graphics.setShader(mask_shader)
-   love.graphics.draw(img, 0, 0)
-   love.graphics.setShader(playbit.graphics.shader)
+local function stencilImageFunction(stencilImg)
+    love.graphics.setShader(mask_shader)
+    love.graphics.draw(stencilImg.data, 0, 0)
+    love.graphics.setShader(playbit.graphics.shader)
 end
 
 local meta = {}
@@ -167,12 +167,10 @@ function meta:getZIndex()
 end
 
 function meta:setStencilImage(stencil)
-    -- print("[WARN] playdate.graphics.sprite:setStencilImage() is not fully tested.")
     self.stencilImage = stencil
 end
 
 function meta:clearStencil()
-    -- print("[WARN] playdate.graphics.sprite:clearStencil() is not fully tested.")
     self.stencilImage = nil
 end
 
@@ -551,8 +549,15 @@ function meta:draw()
         end
         
         if self.stencilImage then
-            love.graphics.stencil(function () stencilImageFunction(self.stencilImage.data) end, "replace", 1)
+            love.graphics.stencil(function () stencilImageFunction(self.stencilImage) end, "replace", 1)
             love.graphics.setStencilTest("greater", 0)
+        end
+
+        if self.image.maskImage then
+            playbit.graphics.shader:send("maskTex", self.image.maskImage.data)
+            playbit.graphics.shader:send("useMask", true)
+        else
+            playbit.graphics.shader:send("useMask", false)
         end
 
         -- always render pure white so its not tinted
@@ -583,6 +588,8 @@ function meta:draw()
 
         love.graphics.setStencilTest()
 
+        playbit.graphics.shader:send("useMask", false)
+
         if self.drawMode then
             playbit.graphics.shader:send(playbit.graphics.MODE_KEY, playbit.graphics.activeContext.drawMode)
         end
@@ -591,8 +598,8 @@ end
 
 -- TODO-Playbit: This needs to be named update()
 function module.updateAll()
-    -- TODO: Should this always be white?
-    love.graphics.clear(playbit.graphics.COLOR_WHITE)
+    -- TODO: How should the screen clear happen?
+    -- love.graphics.clear(playbit.graphics.COLOR_WHITE)
     for _, spr in ipairs(allSprites) do
         if spr.canUpdate then
             if spr.animator then

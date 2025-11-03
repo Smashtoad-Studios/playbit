@@ -99,6 +99,13 @@ function meta:draw(x, y, flip, qx, qy, qw, qh)
       y = y + h
     end
   end
+
+  if self.maskImage then
+      playbit.graphics.shader:send("maskTex", self.maskImage.data)
+      playbit.graphics.shader:send("useMask", true)
+  else
+      playbit.graphics.shader:send("useMask", false)
+  end
   
   if qx and qy and qw and qh then
     local w, h = self:getSize()
@@ -108,6 +115,7 @@ function meta:draw(x, y, flip, qx, qy, qw, qh)
     love.graphics.draw(self.data, x, y, 0, sx, sy)
   end
 
+  playbit.graphics.shader:send("useMask", false)
   love.graphics.setColor(r, g, b, 1)
   playbit.graphics.updateContext()
 end
@@ -148,11 +156,19 @@ function meta:drawRotated(x, y, angle, scale, yscale)
   w = math.floor(w)
   h = math.floor(h)
 
+  if self.maskImage then
+      playbit.graphics.shader:send("maskTex", self.maskImage.data)
+      playbit.graphics.shader:send("useMask", true)
+  else
+      playbit.graphics.shader:send("useMask", false)
+  end
+
   love.graphics.translate(x, y)
   love.graphics.rotate(math.rad(angle))
   love.graphics.draw(self.data, -w, -h)
   love.graphics.pop()
 
+  playbit.graphics.shader:send("useMask", false)
   love.graphics.setColor(r, g, b, 1)
   playbit.graphics.updateContext()
 end
@@ -173,12 +189,20 @@ function meta:drawScaled(x, y, scale, yscale)
   local r, g, b = love.graphics.getColor()
   love.graphics.setColor(1, 1, 1, 1)
 
+  if self.maskImage then
+      playbit.graphics.shader:send("maskTex", self.maskImage.data)
+      playbit.graphics.shader:send("useMask", true)
+  else
+      playbit.graphics.shader:send("useMask", false)
+  end
+
   love.graphics.push()
   love.graphics.translate(x, y)
   love.graphics.scale(scale, yscale)
   love.graphics.draw(self.data, 0, 0)
   love.graphics.pop()
 
+  playbit.graphics.shader:send("useMask", false)
   love.graphics.setColor(r, g, b, 1)
   playbit.graphics.updateContext()
 end
@@ -201,11 +225,11 @@ function meta:drawSampled(x, y, width, height, centerx, centery, dxx, dyx, dxy, 
 end
 
 function meta:setMaskImage(maskImage)
-  print("[WARN] playdate.graphics.image:setMaskImage() is not yet implemented.")
+  self.maskImage = maskImage
 end
 
 function meta:getMaskImage()
-  error("[ERR] playdate.graphics.image:getMaskImage() is not yet implemented.")
+  return self.maskImage
 end
 
 function meta:addMask(opaque)
@@ -257,8 +281,17 @@ function meta:drawTiled(x, y, width, height, flip)
   
   self.data:setWrap("repeat", "repeat")
   playbit.graphics.quad:setViewport(0, 0, width, height, w, h)
+
+  if self.maskImage then
+      playbit.graphics.shader:send("maskTex", self.maskImage.data)
+      playbit.graphics.shader:send("useMask", true)
+  else
+      playbit.graphics.shader:send("useMask", false)
+  end
+
   love.graphics.draw(self.data, playbit.graphics.quad, x, y, 0, scaleX, scaleY)
 
+  playbit.graphics.shader:send("useMask", false)
   love.graphics.setColor(r, g, b, 1)
   playbit.graphics.updateContext()
   print("[WARN] playdate.graphics.image:drawTiled() needs to be tested.")

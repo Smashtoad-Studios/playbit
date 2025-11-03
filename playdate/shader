@@ -12,6 +12,8 @@ extern vec4 patternColor = vec4( 49.0f / 255.0f,  46.0f / 255.0f,  40.0f / 255.0
 extern vec4 white = vec4(214.0f / 255.0f, 211.0f / 255.0f, 203.0f / 255.0f, 1);
 extern vec4 black = vec4( 49.0f / 255.0f,  46.0f / 255.0f,  40.0f / 255.0f, 1);
 extern Image destTex;
+extern Image maskTex;
+extern bool useMask = false;
 
 const vec4 TRANSPARENT =  vec4(0, 0, 0, 0);
 const vec4 DEBUG =        vec4(1, 0, 0, 0.5); // used when rendering via playdate.debugDraw()
@@ -29,6 +31,11 @@ vec3 rgb2hsv(vec3 c)
 
 vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
 {
+  vec4 maskColor = Texel(maskTex, tex_coords);
+  if (useMask && maskColor.rgb == vec3(0.0)) {
+    return TRANSPARENT;
+  }
+
   vec4 outputcolor = Texel(tex, tex_coords) * color;
   if (mode == 1)                  // ---------- "whiteTransparent"
   {
