@@ -21,17 +21,18 @@ module.kDitherTypeBurkes = playbit.graphics.kDitherTypeBurkes
 module.kDitherTypeAtkinson = playbit.graphics.kDitherTypeAtkinson
 
 function module.new(widthOrPath, height, bgColor)
-  -- @@ASSERT(bgcolor == nil, "[ERR] Parameter bgcolor is not yet implemented.")
   local img = setmetatable({}, meta)
-  
-  if bgColor then
-    print("[WARN] playdate.graphics.image.new() parameter bgcolor is not yet implemented.")
-  end
-  img.bgColor = bgColor
 
   if height then
     -- creating empty image with dimensions
     local imageData = love.image.newImageData(widthOrPath, height)
+
+    -- apply the background color
+    if bgColor ~= nil and bgColor ~= playdate.graphics.kColorClear then
+      local c = bgColor == playdate.graphics.kColorBlack and playbit.graphics.colorBlack or playbit.graphics.colorWhite
+      imageData:mapPixel(function (x, y, r, g, b, a) return c[1], c[2], c[3], c[4] end)
+    end
+
     img.imgData = imageData
     img.data = love.graphics.newImage(imageData)
   else
@@ -57,7 +58,7 @@ function meta:load(path)
 end
 
 function meta:copy()
-  local newImg = module.new(self.width, self.height, self.bgColor)
+  local newImg = module.new(self.width, self.height)
   newImg.imgData = self.imgData:clone()
   newImg.data = love.graphics.newImage(newImg.imgData)
   --TODO-Playbit: May need to copy over masks, etc. once those are implemented.
