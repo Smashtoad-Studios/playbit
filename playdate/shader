@@ -7,17 +7,8 @@ extern int mode;
 extern int width;
 extern int height;
 extern bool debugDraw;
-extern bool usePattern = true;
-extern int pattern[64] = int[64](
-    1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1
-);
+extern int pattern[64];
+extern vec4 patternColor = vec4( 49.0f / 255.0f,  46.0f / 255.0f,  40.0f / 255.0f, 1);
 extern vec4 white = vec4(214.0f / 255.0f, 211.0f / 255.0f, 203.0f / 255.0f, 1);
 extern vec4 black = vec4( 49.0f / 255.0f,  46.0f / 255.0f,  40.0f / 255.0f, 1);
 extern Image destTex;
@@ -38,15 +29,6 @@ vec3 rgb2hsv(vec3 c)
 
 vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
 {
-  // Before checking the draw mode, see if this pixel is even getting rendered by the current pattern
-  // Use mod() to get the position of the current pixel within the 8x8 pattern
-  int x = int(mod(screen_coords.x, 8.0));
-  int y = int(mod(screen_coords.y, 8.0));
-  // Use "x" and "y" multiplied by "w" to index into the pattern array
-  if (usePattern && pattern[x + y * 8] == 0) {
-    return TRANSPARENT;
-  }
-
   vec4 outputcolor = Texel(tex, tex_coords) * color;
   if (mode == 1)                  // ---------- "whiteTransparent"
   {
@@ -194,6 +176,28 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
     {
       // transparent pixel
       return TRANSPARENT;
+    }
+  }
+  else if (mode == 8)                     // ---------- "pattern"
+  {
+    // this mode does not exist on PD - this is to implement playdate.graphics.setPattern()
+
+    // Use mod() to get the position of the current pixel within the 8x8 pattern
+    int x = int(mod(screen_coords.x, 8.0));
+    int y = int(mod(screen_coords.y, 8.0));
+
+    // Use "x" and "y" multiplied by "w" to index into the pattern array
+    if (pattern[x + y * 8] == 0) {
+      if (debugDraw)
+      {
+        return DEBUG;
+      }
+      else
+      {
+        return TRANSPARENT;
+      }
+    } else {
+      return patternColor;
     }
   }
   else                                    // ---------- "copy" (default)

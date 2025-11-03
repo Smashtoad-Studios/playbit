@@ -72,9 +72,7 @@ function meta:drawText(str, x, y, width, height, leadingAdjustment, wrapMode, al
   @@ASSERT(alignment == nil, "[ERR] Parameter alignment is not yet implemented.")
   local currentFont = love.graphics.getFont()
   love.graphics.setFont(self.data)
-  playbit.graphics.shader:send("usePattern", false)
   love.graphics.print(str, x, y)
-  playbit.graphics.shader:send("usePattern", true)
   love.graphics.setFont(currentFont)
   playbit.graphics.updateContext()
 end
@@ -94,9 +92,7 @@ function meta:drawTextAligned(str, x, y, alignment, leadingAdjustment)
   
   local currentFont = love.graphics.getFont()
   love.graphics.setFont(self.data)
-  playbit.graphics.shader:send("usePattern", false)
   love.graphics.print(str, x, y)
-  playbit.graphics.shader:send("usePattern", true)
   love.graphics.setFont(currentFont)
   playbit.graphics.updateContext()
 end

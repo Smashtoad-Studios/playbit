@@ -40,6 +40,15 @@ kTextAlignment = {
 	center = 2,
 }
 
+local function setPatternDrawModeAndColor()
+  if playbit.graphics.activeContext.color == playdate.graphics.kColorBlack then
+    playbit.graphics.shader:send("patternColor", playbit.graphics.colorBlack)
+  else
+    playbit.graphics.shader:send("patternColor", playbit.graphics.colorWhite)
+  end
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
+end
+
 function module.setDrawOffset(x, y)
   playbit.graphics.activeContext.drawOffset = {
     x = x,
@@ -69,7 +78,7 @@ function module.getBackgroundColor()
 end
 
 function module.clearPattern()
-  module.setPattern({0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff})
+    module.setPattern({0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff})
 end
 
 function module.setColor(color, keepPattern)
@@ -157,21 +166,21 @@ function module.getImageDrawMode()
 end
 
 function module.drawCircleAtPoint(x, y, radius)
-  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
-    playbit.graphics.updateFramebufferCanvas()
-  end
+  setPatternDrawModeAndColor()
 
   love.graphics.circle("line", x, y, radius)
   playbit.graphics.updateContext()
+
+  module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
 end
 
 function module.fillCircleAtPoint(x, y, radius)
-  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
-    playbit.graphics.updateFramebufferCanvas()
-  end
+  setPatternDrawModeAndColor()
 
   love.graphics.circle("fill", x, y, radius)
   playbit.graphics.updateContext()
+
+  module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
 end
 
 function module.fillCircleInRect(xOrRect, y, width, height)
@@ -219,21 +228,21 @@ function module.getStrokeLocation()
 end
 
 function module.drawRect(x, y, width, height)
-  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
-    playbit.graphics.updateFramebufferCanvas()
-  end
-
+  setPatternDrawModeAndColor()
+  
   love.graphics.rectangle("line", x, y, width, height)
   playbit.graphics.updateContext()
+
+  module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
 end
 
 function module.fillRect(x, y, width, height)
-  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
-    playbit.graphics.updateFramebufferCanvas()
-  end
-
+  setPatternDrawModeAndColor()
+  
   love.graphics.rectangle("fill", x, y, width, height)
   playbit.graphics.updateContext()
+
+  module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
 end
 
 function module.drawRoundRect(x, y, width, height, radius)
@@ -241,12 +250,12 @@ function module.drawRoundRect(x, y, width, height, radius)
   -- TODO-Playbit: Figure out what is different here
   print("[WARN] playdate.graphics.drawRoundRect() does not draw exactly the same as on Playdate.")
 
-  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
-    playbit.graphics.updateFramebufferCanvas()
-  end
-
+  setPatternDrawModeAndColor()
+  
   love.graphics.rectangle("line", x, y, width, height, radius, radius)
   playbit.graphics.updateContext()
+
+  module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
 end
 
 function module.fillRoundRect(x, y, width, height, radius)
@@ -254,18 +263,17 @@ function module.fillRoundRect(x, y, width, height, radius)
   -- TODO-Playbit: Figure out what is different here
   print("[WARN] playdate.graphics.fillRoundRect() does not draw exactly the same as on Playdate.")
 
-  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
-    playbit.graphics.updateFramebufferCanvas()
-  end
-
+  setPatternDrawModeAndColor()
+  
   love.graphics.rectangle("fill", x, y, width, height, radius, radius)
   playbit.graphics.updateContext()
+  
+  module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
 end
 
 function module.fillEllipseInRect(xOrRect, y, width, height, startAngle, endAngle)
-  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
-    playbit.graphics.updateFramebufferCanvas()
-  end
+  setPatternDrawModeAndColor()
+
   -- TODO-Playbit: support all params
   if startAngle or endAngle then
     print("[WARN] playdate.graphics.fillEllipseInRect() does not support start or end angle.")
@@ -277,15 +285,17 @@ function module.fillEllipseInRect(xOrRect, y, width, height, startAngle, endAngl
   love.graphics.ellipse("fill", centerX, centerY, radiusX, radiusY)
   print("[WARN] playdate.graphics.fillEllipseInRect() does not draw exactly the same as on Playdate.")
   playbit.graphics.updateContext()
+
+  module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
 end
 
 function module.drawLine(x1, y1, x2, y2)
-  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
-    playbit.graphics.updateFramebufferCanvas()
-  end
-
+  setPatternDrawModeAndColor()
+  
   love.graphics.line(x1, y1, x2, y2)
   playbit.graphics.updateContext()
+
+  module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
 end
 
 function module.setLineCapStyle(style)
@@ -295,14 +305,12 @@ end
 
 -- TODO-Playbit: Handle just an arc parameter
 function module.drawArc(x, y, radius, startAngle, endAngle)
-  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
-    playbit.graphics.updateFramebufferCanvas()
-  end
-
+  setPatternDrawModeAndColor()
+  
   -- 0 degrees is 270 when drawing an arc on PD...
   startAngle = startAngle - 90
   endAngle = endAngle - 90
-
+  
   if startAngle == endAngle then
     -- if startAngle and endAngle are the same, PD draws a full circle
     love.graphics.arc("line", "open", x, y, radius, math.rad(startAngle), math.rad(endAngle + 360), 16)
@@ -313,34 +321,36 @@ function module.drawArc(x, y, radius, startAngle, endAngle)
     love.graphics.arc("line", "open", x, y, radius, math.rad(endAngle), math.rad(startAngle), 16)
   end
   playbit.graphics.updateContext()
+
+  module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
 end
 
 function module.fillTriangle(x1, y1, x2, y2, x3, y3)
-  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
-    playbit.graphics.updateFramebufferCanvas()
-  end
-
+  setPatternDrawModeAndColor()
+  
   love.graphics.polygon("fill", x1, y1, x2, y2, x3, y3)
   playbit.graphics.updateContext()
+
+  module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
 end
 
 -- TODO-Playbit: Support arbitrary number of points
 function module.fillPolygon(x1, y1, x2, y2, x3, y3, x4, y4)
-  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
-    playbit.graphics.updateFramebufferCanvas()
-  end
-
+  setPatternDrawModeAndColor()
+  
   love.graphics.polygon("fill", x1, y1, x2, y2, x3, y3, x4, y4)
   playbit.graphics.updateContext()
+
+  module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
 end
 
 function module.drawPixel(x, y)
-  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
-    playbit.graphics.updateFramebufferCanvas()
-  end
-
+  setPatternDrawModeAndColor()
+  
   love.graphics.points(x, y)
   playbit.graphics.updateContext()
+
+  module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
 end
 
 function module.setFont(font, variant)
@@ -415,7 +425,7 @@ function module.drawText(text, x, y, width, height, fontFamily, leadingAdjustmen
   end
 
   local font = playbit.graphics.activeContext.fontFamily[playdate.graphics.font.kVariantNormal]
-  font:drawText(text, x, y, fontFamily, leadingAdjustment)
+  font:drawText(text, x, y, width, height, leadingAdjustment, wrapMode, alignmen)
   playbit.graphics.updateContext()
 end
 
@@ -524,7 +534,7 @@ function module.pushContext(image)
       strokeLocation = module.kStrokeCentered,
       drawOffset = {x = 0, y = 0},
       ditherPattern = nil,
-      ditherAlpha = 1.0,
+      ditherAlpha = 0.0,
       pattern = nil,
       fontFamily = {},
       clipRect = nil,
