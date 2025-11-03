@@ -40,6 +40,15 @@ kTextAlignment = {
 	center = 2,
 }
 
+local function setPatternDrawModeAndColor()
+  if playbit.graphics.activeContext.color == playdate.graphics.kColorBlack then
+    playbit.graphics.shader:send("patternColor", playbit.graphics.colorBlack)
+  else
+    playbit.graphics.shader:send("patternColor", playbit.graphics.colorWhite)
+  end
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
+end
+
 function module.setDrawOffset(x, y)
   playbit.graphics.activeContext.drawOffset = {
     x = x,
@@ -68,21 +77,20 @@ function module.getBackgroundColor()
   return playbit.graphics.activeContext.backgroundColor
 end
 
-function module.setColor(color)
+function module.clearPattern()
+    module.setPattern({0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff})
+end
+
+function module.setColor(color, keepPattern)
   -- TODO: save this to graphics context
-  @@ASSERT(color == 1 or color == 0, "Only values of 0 (black) or 1 (white) are supported.")
+  @@ASSERT(color == playdate.graphics.kColorBlack or color == playdate.graphics.kColorWhite, "Only values of 0 (black) or 1 (white) are supported.")
   playbit.graphics.activeContext.color = color
   -- when drawing without a pattern, we must flip the pattern mask for white/black because of the way the shader draws patterns
-  if color == 1 then
-    local c = playbit.graphics.colorWhite
-    -- reset pattern, as per PD behavior
-    module.setPattern({0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff})
-    love.graphics.setColor(c[1], c[2], c[3], c[4])
-  else
-    local c = playbit.graphics.colorBlack
-    -- reset pattern, as per PD behavior
-    module.setPattern({0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
-    love.graphics.setColor(c[1], c[2], c[3], c[4])
+  local c = color == playdate.graphics.kColorWhite and playbit.graphics.colorWhite or playbit.graphics.colorBlack
+  love.graphics.setColor(c[1], c[2], c[3], c[4])
+  -- reset pattern, as per PD behavior
+  if not keepPattern then
+    module.clearPattern()
   end
 end
 
@@ -92,6 +100,7 @@ end
 
 function module.setPattern(pattern)
   playbit.graphics.activeContext.pattern = pattern
+  playbit.graphics.activeContext.ditherType = nil
 
   -- bitshifting does not work in shaders, so do it here in Lua
   local pixels = {}
@@ -157,7 +166,7 @@ function module.getImageDrawMode()
 end
 
 function module.drawCircleAtPoint(x, y, radius)
-  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
+  setPatternDrawModeAndColor()
 
   love.graphics.circle("line", x, y, radius)
   playbit.graphics.updateContext()
@@ -166,7 +175,7 @@ function module.drawCircleAtPoint(x, y, radius)
 end
 
 function module.fillCircleAtPoint(x, y, radius)
-  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
+  setPatternDrawModeAndColor()
 
   love.graphics.circle("fill", x, y, radius)
   playbit.graphics.updateContext()
@@ -219,8 +228,8 @@ function module.getStrokeLocation()
 end
 
 function module.drawRect(x, y, width, height)
-  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
-
+  setPatternDrawModeAndColor()
+  
   love.graphics.rectangle("line", x, y, width, height)
   playbit.graphics.updateContext()
 
@@ -228,8 +237,8 @@ function module.drawRect(x, y, width, height)
 end
 
 function module.fillRect(x, y, width, height)
-  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
-
+  setPatternDrawModeAndColor()
+  
   love.graphics.rectangle("fill", x, y, width, height)
   playbit.graphics.updateContext()
 
@@ -240,8 +249,9 @@ function module.drawRoundRect(x, y, width, height, radius)
   -- TODO: love's rectangle function doesn't draw the same way as Playdate's
   -- TODO-Playbit: Figure out what is different here
   print("[WARN] playdate.graphics.drawRoundRect() does not draw exactly the same as on Playdate.")
-  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
 
+  setPatternDrawModeAndColor()
+  
   love.graphics.rectangle("line", x, y, width, height, radius, radius)
   playbit.graphics.updateContext()
 
@@ -252,15 +262,18 @@ function module.fillRoundRect(x, y, width, height, radius)
   -- TODO: love's rectangle function doesn't draw the same way as Playdate's
   -- TODO-Playbit: Figure out what is different here
   print("[WARN] playdate.graphics.fillRoundRect() does not draw exactly the same as on Playdate.")
-  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
 
+  setPatternDrawModeAndColor()
+  
   love.graphics.rectangle("fill", x, y, width, height, radius, radius)
   playbit.graphics.updateContext()
-
+  
   module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
 end
 
 function module.fillEllipseInRect(xOrRect, y, width, height, startAngle, endAngle)
+  setPatternDrawModeAndColor()
+
   -- TODO-Playbit: support all params
   if startAngle or endAngle then
     print("[WARN] playdate.graphics.fillEllipseInRect() does not support start or end angle.")
@@ -271,11 +284,14 @@ function module.fillEllipseInRect(xOrRect, y, width, height, startAngle, endAngl
   local centerY = y + radiusY
   love.graphics.ellipse("fill", centerX, centerY, radiusX, radiusY)
   print("[WARN] playdate.graphics.fillEllipseInRect() does not draw exactly the same as on Playdate.")
+  playbit.graphics.updateContext()
+
+  module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
 end
 
 function module.drawLine(x1, y1, x2, y2)
-  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
-
+  setPatternDrawModeAndColor()
+  
   love.graphics.line(x1, y1, x2, y2)
   playbit.graphics.updateContext()
 
@@ -289,12 +305,12 @@ end
 
 -- TODO-Playbit: Handle just an arc parameter
 function module.drawArc(x, y, radius, startAngle, endAngle)
-  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
-
+  setPatternDrawModeAndColor()
+  
   -- 0 degrees is 270 when drawing an arc on PD...
   startAngle = startAngle - 90
   endAngle = endAngle - 90
-
+  
   if startAngle == endAngle then
     -- if startAngle and endAngle are the same, PD draws a full circle
     love.graphics.arc("line", "open", x, y, radius, math.rad(startAngle), math.rad(endAngle + 360), 16)
@@ -310,8 +326,8 @@ function module.drawArc(x, y, radius, startAngle, endAngle)
 end
 
 function module.fillTriangle(x1, y1, x2, y2, x3, y3)
-  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
-
+  setPatternDrawModeAndColor()
+  
   love.graphics.polygon("fill", x1, y1, x2, y2, x3, y3)
   playbit.graphics.updateContext()
 
@@ -320,8 +336,8 @@ end
 
 -- TODO-Playbit: Support arbitrary number of points
 function module.fillPolygon(x1, y1, x2, y2, x3, y3, x4, y4)
-  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
-
+  setPatternDrawModeAndColor()
+  
   love.graphics.polygon("fill", x1, y1, x2, y2, x3, y3, x4, y4)
   playbit.graphics.updateContext()
 
@@ -329,8 +345,8 @@ function module.fillPolygon(x1, y1, x2, y2, x3, y3, x4, y4)
 end
 
 function module.drawPixel(x, y)
-  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, 8)
-
+  setPatternDrawModeAndColor()
+  
   love.graphics.points(x, y)
   playbit.graphics.updateContext()
 
@@ -364,6 +380,14 @@ function module.getFont(variant)
   end
 end
 
+function module.getSystemFont(variant)
+  error("[ERR] playdate.graphics.getSystemFont() is not yet implemented.")
+end
+
+function module.setFontTracking(pixels)
+  error("[ERR] playdate.graphics.setFontTracking() is not yet implemented.")
+end
+
 function module.getTextSize(str, fontFamily, leadingAdjustment)
   @@ASSERT(fontFamily == nil, "[ERR] Parameter fontFamily is not yet implemented.")
   @@ASSERT(leadingAdjustment == nil, "[ERR] Parameter leadingAdjustment is not yet implemented.")
@@ -395,8 +419,13 @@ function module.drawText(text, x, y, width, height, fontFamily, leadingAdjustmen
   @@ASSERT(alignment == nil, "[ERR] Parameter alignment is not yet implemented.")
 
   @@ASSERT(text ~= nil, "Text is nil")
+
+  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
+    playbit.graphics.updateFramebufferCanvas()
+  end
+
   local font = playbit.graphics.activeContext.fontFamily[playdate.graphics.font.kVariantNormal]
-  font:drawText(text, x, y, fontFamily, leadingAdjustment)
+  font:drawText(text, x, y, width, height, leadingAdjustment, wrapMode, alignmen)
   playbit.graphics.updateContext()
 end
 
@@ -446,16 +475,15 @@ local function applyContext(context)
   module.setFontFamily(context.fontFamily)
   module.setDrawOffset(context.drawOffset.x, context.drawOffset.y)
 
-  -- setting color nils out pattern / ditherPattern
   if context.color ~= nil then
-    module.setColor(context.color)
+    module.setColor(context.color, true)
   end
-  -- TODO do pattern and ditherPattern overwrite each other?
-  if context.ditherPattern ~= nil then
-    module.setDitherPattern(context.ditherAlpha, context.ditherPattern)
-  end
-  if context.pattern ~= nil then
+  if context.ditherType ~= nil then
+    module.setDitherPattern(context.ditherAlpha, context.ditherType)
+  elseif context.pattern ~= nil then
     module.setPattern(context.pattern)
+  else
+    module.clearPattern()
   end
   if context.clipRect ~= nil then
     module.setClipRect(context.clipRect)
@@ -506,7 +534,7 @@ function module.pushContext(image)
       strokeLocation = module.kStrokeCentered,
       drawOffset = {x = 0, y = 0},
       ditherPattern = nil,
-      ditherAlpha = 1.0,
+      ditherAlpha = 0.0,
       pattern = nil,
       fontFamily = {},
       clipRect = nil,
@@ -538,9 +566,42 @@ function module.popContext()
 end
 
 function module.setDitherPattern(alpha, ditherType)
-  playbit.graphics.activeContext.ditherPattern = ditherType
+  if ditherType == nil then
+    ditherType = playdate.graphics.image.kDitherTypeBayer8x8
+  end
+
+  playbit.graphics.activeContext.pattern = nil
+  playbit.graphics.activeContext.ditherType = ditherType
   playbit.graphics.activeContext.ditherAlpha = alpha
-  print("[WARN] playdate.graphics.setDitherPattern() has no effect.")
+
+  if ditherType == playdate.graphics.image.kDitherTypeNone then
+    -- TODO not completely sure this is correct
+    module.clearPattern()
+    return
+  end
+  
+  local thresholds = playbit.graphics.ditherThresholds[ditherType]
+
+  @@ASSERT(thresholds ~= nil, "[ERR] Invalid dither type. Only ordered dither types are currently implemented.")
+
+  local pattern = {}
+
+  local numRows = #thresholds
+  local numCols = #thresholds[1]
+  
+  -- always create an 8x8 pattern, even for smaller dither types
+  for i = 1, 8 do
+    for j = 1, 8 do
+      local thresholdValue = thresholds[((i - 1) % numRows) + 1][((j - 1) % numCols) + 1]
+      if alpha > thresholds[((i - 1) % numRows) + 1][((j - 1) % numCols) + 1] then
+        table.insert(pattern, 0)
+      else
+        table.insert(pattern, 1)
+      end
+    end
+  end
+  
+  playbit.graphics.shader:send("pattern", unpack(pattern))
 end
 
 function module.setClipRect(xOrRect, y, width, height)

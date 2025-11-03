@@ -30,22 +30,6 @@ function module.newFamily(fontPaths)
   return fontFamily
 end
 
-function module.setFont(font, variant)
-  error("[ERR] playdate.graphics.font.setFont() is not yet implemented.")
-end
-
-function module.getFont(variant)
-  error("[ERR] playdate.graphics.font.getFont() is not yet implemented.")
-end
-
-function module.setFontTracking(pixels)
-  error("[ERR] playdate.graphics.font.setFontTracking() is not yet implemented.")
-end
-
-function module.getSystemFont(variant)
-  error("[ERR] playdate.graphics.font.getSystemFont() is not yet implemented.")
-end
-
 function meta:getTextWidth(str)
   --[[ 
     NOTE: width returned will not be the same as on Playdate
