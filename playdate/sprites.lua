@@ -610,7 +610,16 @@ function module.updateAll()
                 end
             end
             spr:update()
-            spr:draw()
+            if not spr.image then
+                -- if the sprite does not have an image, translate so that drawing will happen relative to the sprite
+                love.graphics.push()
+                love.graphics.translate(spr.x, spr.y)
+                spr:draw()
+                love.graphics.pop()
+            else
+                -- TODO make this different, because the docs say draw is only called if the sprite doesn't have an image
+                spr:draw()
+            end
         end
     end
 end

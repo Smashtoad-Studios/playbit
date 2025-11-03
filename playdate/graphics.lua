@@ -473,7 +473,7 @@ local function applyContext(context)
   module.setStrokeLocation(context.strokeLocation)
   module.setLineCapStyle(context.lineCapStyle)
   module.setFontFamily(context.fontFamily)
-  module.setDrawOffset(context.drawOffset.x, context.drawOffset.y)
+  -- module.setDrawOffset(context.drawOffset.x, context.drawOffset.y)
 
   if context.color ~= nil then
     module.setColor(context.color, true)
