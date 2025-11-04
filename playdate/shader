@@ -33,7 +33,7 @@ vec3 rgb2hsv(vec3 c)
 vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
 {
   vec4 maskColor = Texel(maskTex, tex_coords);
-  if (useMask && maskColor.rgb == vec3(0.0)) {
+  if (useMask && rgb2hsv(vec3(maskColor)).z < 0.45f) {
     return TRANSPARENT;
   }
   // Use mod() to get the position of the current pixel within the 8x8 pattern
