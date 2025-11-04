@@ -87,7 +87,7 @@ function module.setColor(color, keepPattern)
   playbit.graphics.activeContext.color = color
   -- when drawing without a pattern, we must flip the pattern mask for white/black because of the way the shader draws patterns
   local c = color == playdate.graphics.kColorWhite and playbit.graphics.colorWhite or playbit.graphics.colorBlack
-  love.graphics.setColor(c[1], c[2], c[3], c[4])
+  love.graphics.setColor(c)
   -- reset pattern, as per PD behavior
   if not keepPattern then
     module.clearPattern()
@@ -127,7 +127,7 @@ function module.clear(color)
   @@ASSERT(clearColor == module.kColorWhite or clearColor == module.kColorBlack, "Only values of 0 (black) or 1 (white) are supported.")
   
   local c = clearColor == module.kColorWhite and playbit.graphics.colorWhite or playbit.graphics.colorBlack
-  love.graphics.clear(c[1], c[2], c[3], c[4])
+  love.graphics.clear(c)
   playbit.graphics.lastClearColor = c
   playbit.graphics.updateContext()
 end

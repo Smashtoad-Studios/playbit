@@ -82,8 +82,7 @@ function love.draw()
     Otherwise setting the bg color outside of playdate.update() won't be consistent with PD.
   --]]
   if firstFrame then
-    local c = playbit.graphics.lastClearColor
-    love.graphics.clear(c.r, c.g, c.b, 1)
+    love.graphics.clear(playbit.graphics.lastClearColor)
     firstFrame = false
   end
 
