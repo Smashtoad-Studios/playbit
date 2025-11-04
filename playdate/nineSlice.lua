@@ -93,6 +93,9 @@ function module.meta:drawInRect(xOrRect, y, width, height)
       {xOrRect + width - r, y + height - b, r, b},                 -- bottom-right
   }
 
+  -- nine slice does not use the current draw mode
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, playdate.graphics.kDrawModeCopy)
+
   -- always render pure white so its not tinted
   local r, g, b = love.graphics.getColor()
   love.graphics.setColor(1, 1, 1, 1)
@@ -103,4 +106,7 @@ function module.meta:drawInRect(xOrRect, y, width, height)
   end
   love.graphics.setColor(r, g, b, 1)
   playbit.graphics.updateContext()
+
+  -- restore the draw mode
+  playbit.graphics.shader:send(playbit.graphics.MODE_KEY, playbit.graphics.activeContext.drawMode)
 end

@@ -61,6 +61,7 @@ function meta:copy()
   local newImg = module.new(self.width, self.height)
   newImg.imgData = self.imgData:clone()
   newImg.data = love.graphics.newImage(newImg.imgData)
+  newImg.maskImage = self.maskImage
   --TODO-Playbit: May need to copy over masks, etc. once those are implemented.
   return newImg
 end
@@ -306,12 +307,52 @@ function meta:blurredImage(radius, numPasses, ditherType, padEdges, xPhase, yPha
 end
 
 function meta:drawFaded(x, y, alpha, ditherType)
-  error("[ERR] playdate.graphics.image:drawFaded() is not yet implemented.")
+  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
+    playbit.graphics.updateFramebufferCanvas()
+  end
+  
+  -- always render pure white so its not tinted
+  local r, g, b = love.graphics.getColor()
+  love.graphics.setColor(1, 1, 1, 1)
+
+  if self.maskImage then
+      playbit.graphics.shader:send("maskTex", self.maskImage.data)
+      playbit.graphics.shader:send("useMask", true)
+  else
+      playbit.graphics.shader:send("useMask", false)
+  end
+
+  local currentPattern = playbit.graphics.activeContext.pattern
+  local currentDitherType = playbit.graphics.activeContext.ditherType
+  local currentDitherAlpha = playbit.graphics.activeContext.ditherAlpha
+
+  -- set the dither patter and enable pattern drawing to shader
+  -- note that alpha is reversed here vs. when normally setting dither pattern
+  playdate.graphics.setDitherPattern(1.0 - alpha, ditherType)
+  playbit.graphics.shader:send("usePattern", true)
+
+  love.graphics.draw(self.data, x, y)
+
+  playbit.graphics.shader:send("useMask", false)
+  playbit.graphics.shader:send("usePattern", false)
+  
+  -- restore the dither pattern from before
+  if currentPattern ~= nil then
+    playdate.graphics.setPattern(currentPattern)
+  elseif currentDitherType ~= nil then
+    playdate.graphics.setDitherPattern(currentDitherAlpha, currentDitherType)
+  end
+
+  love.graphics.setColor(r, g, b, 1)
+  playbit.graphics.updateContext()
 end
 
 function meta:fadedImage(alpha, ditherType)
-  print("[WARN] playdate.graphics.image:fadedImage() is not yet implemented.")
-  return self:copy()
+  local fadedImg = module.new(self.width, self.height)
+  playdate.graphics.pushContext(fadedImg)
+    self:drawFaded(0, 0, alpha, ditherType)
+  playdate.graphics.popContext()
+  return fadedImg
 end
 
 function meta:setInverted(flag)

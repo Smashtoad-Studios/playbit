@@ -14,6 +14,7 @@ extern vec4 black = vec4( 49.0f / 255.0f,  46.0f / 255.0f,  40.0f / 255.0f, 1);
 extern Image destTex;
 extern Image maskTex;
 extern bool useMask = false;
+extern bool usePattern = false;
 
 const vec4 TRANSPARENT =  vec4(0, 0, 0, 0);
 const vec4 DEBUG =        vec4(1, 0, 0, 0.5); // used when rendering via playdate.debugDraw()
@@ -33,6 +34,13 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
 {
   vec4 maskColor = Texel(maskTex, tex_coords);
   if (useMask && maskColor.rgb == vec3(0.0)) {
+    return TRANSPARENT;
+  }
+  // Use mod() to get the position of the current pixel within the 8x8 pattern
+  int x = int(mod(screen_coords.x, 8.0));
+  int y = int(mod(screen_coords.y, 8.0));
+  // Use "x" and "y" multiplied by "w" to index into the pattern array
+  if (usePattern && pattern[x + y * 8] == 0) {
     return TRANSPARENT;
   }
 

@@ -544,7 +544,7 @@ function meta:draw()
             playbit.graphics.updateFramebufferCanvas()
         end
         
-        if self.drawMode then
+        if self.drawMode ~= nil then
             playbit.graphics.shader:send(playbit.graphics.MODE_KEY, self.drawMode)
         end
         
@@ -590,7 +590,7 @@ function meta:draw()
 
         playbit.graphics.shader:send("useMask", false)
 
-        if self.drawMode then
+        if self.drawMode ~= nil then
             playbit.graphics.shader:send(playbit.graphics.MODE_KEY, playbit.graphics.activeContext.drawMode)
         end
     end
