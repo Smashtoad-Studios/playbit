@@ -72,12 +72,6 @@ function timer:setCurrentDuration(duration)
 	self.timeLeft = self.duration - self.currentTime
 end
 
-function timer:repeatTimer()
-      local ct = self:getCurrentDuration()
-      -- continue off from where the timer ended so there isn't a huge gap on first tick
-      self:setCurrentDuration(ct - self.duration)
-end
-
 function timer.unitTest()
 	local numFinished = 0
 
@@ -104,7 +98,7 @@ function timer.unitTest()
 		numFinished = numFinished + 1
 
 		timerToReset:reset()
-		@@ASSERT(not timerToReset._hasReversed, "[ERR] playdate.timer.unitTest to failed to reset _hasReversed")
+		@@ASSERT(not timerToReset.hasReversed, "[ERR] playdate.timer.unitTest to failed to reset hasReversed")
 		@@ASSERT(timerToReset._remainingDelay == timerToReset.delay, "[ERR] playdate.timer.unitTest to failed to reset _remainingDelay")
 		@@ASSERT(timerToReset.active, "[ERR] playdate.timer.unitTest to failed to reset active")
 		@@ASSERT(timerToReset.startValue == timerToReset.originalValues.startValue, "[ERR] playdate.timer.unitTest to failed to reset startValue")

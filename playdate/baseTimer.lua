@@ -17,7 +17,7 @@ end
 ---Set the next value of this timer based on the easing
 ---@param timer The timer to update the value.
 local function updateTimerValue(timer)
-	if timer.workingValues.startValue ~= timer.workingValues.endValue and timer:getCurrentDuration() ~= 0 then
+	if timer.workingValues.startValue ~= timer.workingValues.endValue then
 		timer.value = timer.workingValues.easingFunction(
 			timer:getCurrentDuration(), 
 			timer.workingValues.startValue, 
@@ -37,6 +37,8 @@ local function completeTimer(timer)
 	if not timer.timerEndedCallback then
 		return
 	end
+
+	timer.value = timer.workingValues.endValue
 	
 	if timer.timerEndedArgs then
 		timer.timerEndedCallback(table.unpack(timer.timerEndedArgs))
@@ -49,7 +51,7 @@ function baseTimer:init(duration, ...)
 	local args = {...}
 	
 	self._remainingDelay = nil 
-	self._hasReversed = false
+	self.hasReversed = false
 
 	self.duration = duration
 	self:setCurrentDuration(0)
@@ -131,12 +133,12 @@ function baseTimer.updateTimers(timers, timersToRemove)
 		end
 		
 		-- timer complete
-		if timer.reverses and not timer._hasReversed then
+		if timer.reverses and not timer.hasReversed then
 			-- reverse timer
-			local temp = timer.workingValues.startValue
-			timer.workingValues.startValue = timer.workingValues.endValue
-			timer.workingValues.endValue = temp
-			timer:setCurrentDuration(timer.duration)			
+			timer.workingValues.startValue = timer.endValue
+			timer.workingValues.endValue = timer.startValue
+			timer.value = timer.endValue
+			timer:setCurrentDuration(0)
 			timer._remainingDelay = timer.delay
 
 			if timer.reverseEasingFunction then
@@ -144,7 +146,7 @@ function baseTimer.updateTimers(timers, timersToRemove)
 			end
 
 			-- so we don't reverse a second time (set repeats to true to do that)
-			timer._hasReversed = true 
+			timer.hasReversed = true 
 
 		-- repeat timer
 		elseif timer.repeats then
@@ -152,11 +154,6 @@ function baseTimer.updateTimers(timers, timersToRemove)
 			timer:reset()
 			-- record that the callback was invoked while repeating
 			timer._calledOnRepeat = true 
-
-			-- Call any extra functionality related to this timer type if any
-			if timer.repeatTimer ~= nil then
-				timer:repeatTimer()
-			end
 
 			updateTimerValue(timer)
 			updateTimer(timer)
@@ -216,7 +213,7 @@ end
 
 function baseTimer:reset()
 	self:setCurrentDuration(0)
-	self._hasReversed = false
+	self.hasReversed = false
 	self._remainingDelay = self.delay
 	self.active = true
 	self.workingValues.startValue = self.startValue

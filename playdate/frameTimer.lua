@@ -95,7 +95,7 @@ function frameTimer.unitTest()
 		numFinished = numFinished + 1
 
 		frameTimerToReset:reset()
-		@@ASSERT(not frameTimerToReset._hasReversed, "[ERR] playdate.frameTimer.unitTest to failed to reset _hasReversed")
+		@@ASSERT(not frameTimerToReset.hasReversed, "[ERR] playdate.frameTimer.unitTest to failed to reset hasReversed")
 		@@ASSERT(frameTimerToReset._remainingDelay == frameTimerToReset.delay, "[ERR] playdate.frameTimer.unitTest to failed to reset _remainingDelay")
 		@@ASSERT(frameTimerToReset.active, "[ERR] playdate.frameTimer.unitTest to failed to reset active")
 		@@ASSERT(frameTimerToReset.startValue == frameTimerToReset.originalValues.startValue, "[ERR] playdate.frameTimer.unitTest to failed to reset startValue")
