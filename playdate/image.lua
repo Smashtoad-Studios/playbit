@@ -136,8 +136,30 @@ function meta:drawCentered(x, y, flip)
 end
 
 function meta:clear(color)
-  -- TODO-Playbit: Need to be able to clear for sure
-  print("[ERR] playdate.graphics.image:clear() is not yet implemented.")
+  local newImgData = love.image.newImageData(self.width, self.height)
+
+  local newColor
+  local newMaskImage
+  if color == playdate.graphics.kColorBlack then
+    newColor = playbit.graphics.colorBlack
+    newMaskImage = module.new(self.width, self.height, playdate.graphics.kColorWhite)
+  elseif color == playdate.graphics.kColorWhite then
+    newColor = playbit.graphics.colorWhite
+    newMaskImage = module.new(self.width, self.height, playdate.graphics.kColorWhite)
+  elseif color == playdate.graphics.kColorClear then
+    newColor = playbit.graphics.colorClear
+    if self.maskImage == nil then
+      self.maskImages = module.new(self.width, self.height, playdate.graphics.kColorBlack)
+    end
+  else
+    error("[ERR] playdate.graphics.image:clear() Invalid clear color")
+  end
+
+  if newColor then
+    newImgData:mapPixel(function (x, y, r, g, b, a) return newColor[1], newColor[2], newColor[3], newColor[4] end)
+    self.data = love.graphics.newImage(newImgData)
+    self.imgData = newImgData
+  end
 end
 
 function meta:sample(x, y)
