@@ -532,7 +532,7 @@ function meta:getCenter()
 end
 
 function meta:getCenterPoint()
-    return self.x - self.width * self._centerX, self.y - self.height * self._centerY
+    return self.x - math.floor(self.width * self._centerX), self.y - math.floor(self.height * self._centerY)
 end
 
 function meta:update()
@@ -585,7 +585,7 @@ function meta:draw()
             self.x, self.y,
             math.rad(self.rotation),
             self.scaleX, self.scaleY,
-            self.width * self._centerX, self.height * self._centerY
+            math.floor(self.width * self._centerX), math.floor(self.height * self._centerY)
         )
 
         -- clear the clip rect
@@ -628,7 +628,6 @@ function module.updateAll()
                 -- if the sprite does not have an image, translate so that drawing will happen relative to the sprite
                 love.graphics.push()
                 love.graphics.translate(posX, posY)
-                playbit.graphics.shader:send("screenOffset", {posX, posY})
                 
                 local maxWidth, maxHeight = love.graphics.getCanvas():getDimensions()
 
@@ -658,6 +657,8 @@ function module.updateAll()
                 if posBottom > maxHeight then
                     drawHeight = drawHeight - (posBottom - maxHeight)
                 end
+
+                playbit.graphics.shader:send("screenOffset", {posX + drawOffsetX, posY + drawOffsetY})
 
                 spr:draw(drawOffsetX, drawOffsetY, drawWidth, drawHeight)
                 love.graphics.pop()
