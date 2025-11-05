@@ -9,6 +9,7 @@ extern int pattern[64];
 extern vec4 patternColor = vec4( 49.0f / 255.0f,  46.0f / 255.0f,  40.0f / 255.0f, 1);
 extern vec4 white = vec4(214.0f / 255.0f, 211.0f / 255.0f, 203.0f / 255.0f, 1);
 extern vec4 black = vec4( 49.0f / 255.0f,  46.0f / 255.0f,  40.0f / 255.0f, 1);
+extern vec2 screenOffset = vec2( 0, 0);
 extern Image destTex;
 extern Image maskTex;
 extern bool useMask = false;
@@ -138,7 +139,7 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
   {
     if (outputcolor.a > 0)
     {
-      vec2 normalizedCoords = screen_coords / vec2(love_ScreenSize.x, love_ScreenSize.y);
+      vec2 normalizedCoords = (screen_coords + screenOffset) / vec2(love_ScreenSize.x, love_ScreenSize.y);
       vec4 destColor = Texel(destTex, normalizedCoords);
 
       bool isWhiteSrc = rgb2hsv(vec3(outputcolor)).z < 0.45;
@@ -165,7 +166,7 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
   {
     if (outputcolor.a > 0)
     {
-      vec2 normalizedCoords = screen_coords / vec2(love_ScreenSize.x, love_ScreenSize.y);
+      vec2 normalizedCoords = (screen_coords + screenOffset) / vec2(love_ScreenSize.x, love_ScreenSize.y);
       vec4 destColor = Texel(destTex, normalizedCoords);
 
       bool isWhiteSrc = rgb2hsv(vec3(outputcolor)).z < 0.45;

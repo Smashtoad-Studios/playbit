@@ -624,8 +624,10 @@ function module.updateAll()
                 -- if the sprite does not have an image, translate so that drawing will happen relative to the sprite
                 love.graphics.push()
                 love.graphics.translate(spr.x, spr.y)
+                playbit.graphics.shader:send("screenOffset", {spr.x, spr.y})
                 spr:draw(0, 0, spr.width, spr.height)
                 love.graphics.pop()
+                playbit.graphics.shader:send("screenOffset", {0, 0})
             else
                 -- TODO make this different, because the docs say draw is only called if the sprite doesn't have an image
                 spr:draw()
