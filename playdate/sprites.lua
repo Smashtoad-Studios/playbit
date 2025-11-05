@@ -96,7 +96,7 @@ end
 function meta:copy()
     local newSprite = module.new(self.image)
     newSprite:moveTo(self.x, self.y)
-    newSprite:setCenter(self.centerX, self.centerY)
+    newSprite:setCenter(self._centerX, self._centerY)
     newSprite:setRotation(self.rotation, self.scaleX, self.scaleY)
     newSprite:setZIndex(self.zIndex)
     newSprite:setVisible(self.visible)
@@ -523,16 +523,16 @@ function meta:isVisible()
 end
 
 function meta:setCenter(x, y)
-    self.centerX = x
-    self.centerY = y
+    self._centerX = x
+    self._centerY = y
 end
 
 function meta:getCenter()
-    return self.centerX, self.centerY
+    return self._centerX, self._centerY
 end
 
 function meta:getCenterPoint()
-    return self.x - self.width * self.centerX, self.y - self.height * self.centerY
+    return self.x - self.width * self._centerX, self.y - self.height * self._centerY
 end
 
 function meta:update()
@@ -585,7 +585,7 @@ function meta:draw()
             self.x, self.y,
             math.rad(self.rotation),
             self.scaleX, self.scaleY,
-            self.width * self.centerX, self.height * self.centerY
+            self.width * self._centerX, self.height * self._centerY
         )
 
         -- clear the clip rect
@@ -621,11 +621,45 @@ function module.updateAll()
             end
             spr:update()
             if not spr.image then
+                local posX, posY = spr:getCenterPoint()
+                local drawWidth = spr.width
+                local drawHeight = spr.height
+                
                 -- if the sprite does not have an image, translate so that drawing will happen relative to the sprite
                 love.graphics.push()
-                love.graphics.translate(spr.x, spr.y)
-                playbit.graphics.shader:send("screenOffset", {spr.x, spr.y})
-                spr:draw(0, 0, spr.width, spr.height)
+                love.graphics.translate(posX, posY)
+                playbit.graphics.shader:send("screenOffset", {posX, posY})
+                
+                local maxWidth, maxHeight = love.graphics.getCanvas():getDimensions()
+
+                local drawOffsetX = 0
+                local drawOffsetY = 0
+
+                -- if the sprite is off the canvas, offset the drawing position to be on the canvas
+                if posX < 0 then
+                    posX = -posX
+                    drawOffsetX = posX
+                    drawWidth = drawWidth - posX
+                end
+                if posY < 0 then
+                    posY = -posY
+                    drawOffsetY = posY
+                    drawHeight = drawHeight - posY
+                end
+
+                -- get the right / bottom positions to see if they extend passed the edge of the canvas
+                local posRight = posX + drawWidth
+                local posBottom = posY + drawHeight
+
+                -- if they do, then adjust the drawing size so that it stays on the canvas
+                if posRight > maxWidth then
+                    drawWidth = drawWidth - (posRight - maxWidth)
+                end
+                if posBottom > maxHeight then
+                    drawHeight = drawHeight - (posBottom - maxHeight)
+                end
+
+                spr:draw(drawOffsetX, drawOffsetY, drawWidth, drawHeight)
                 love.graphics.pop()
                 playbit.graphics.shader:send("screenOffset", {0, 0})
             else
