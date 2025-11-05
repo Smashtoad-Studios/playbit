@@ -4,8 +4,6 @@
 #pragma language glsl3
 
 extern int mode;
-extern int width;
-extern int height;
 extern bool debugDraw;
 extern int pattern[64];
 extern vec4 patternColor = vec4( 49.0f / 255.0f,  46.0f / 255.0f,  40.0f / 255.0f, 1);
@@ -140,7 +138,7 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
   {
     if (outputcolor.a > 0)
     {
-      vec2 normalizedCoords = screen_coords / vec2(width, height);
+      vec2 normalizedCoords = screen_coords / vec2(love_ScreenSize.x, love_ScreenSize.y);
       vec4 destColor = Texel(destTex, normalizedCoords);
 
       bool isWhiteSrc = rgb2hsv(vec3(outputcolor)).z < 0.45;
@@ -167,7 +165,7 @@ vec4 effect(vec4 color, Image tex, vec2 tex_coords, vec2 screen_coords)
   {
     if (outputcolor.a > 0)
     {
-      vec2 normalizedCoords = screen_coords / vec2(width, height);
+      vec2 normalizedCoords = screen_coords / vec2(love_ScreenSize.x, love_ScreenSize.y);
       vec4 destColor = Texel(destTex, normalizedCoords);
 
       bool isWhiteSrc = rgb2hsv(vec3(outputcolor)).z < 0.45;

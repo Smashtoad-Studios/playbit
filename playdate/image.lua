@@ -78,6 +78,10 @@ end
 -- (x, y, flip, sourceRect)
 -- (p, flip, sourceRect)
 function meta:draw(x, y, flip, qx, qy, qw, qh)
+  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
+    playbit.graphics.updateFramebufferCanvas()
+  end
+  
   -- always render pure white so its not tinted
   local r, g, b = love.graphics.getColor()
   love.graphics.setColor(1, 1, 1, 1)

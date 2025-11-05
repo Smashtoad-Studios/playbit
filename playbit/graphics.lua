@@ -91,9 +91,6 @@ local canvasY = 0
 local windowWidth, windowHeight = love.graphics.getDimensions()
 local fullscreen = false
 
-playbit.graphics.shader:send("width", canvasWidth)
-playbit.graphics.shader:send("height", canvasHeight)
-
 --- Sets the scale of the canvas.
 ---@param scale number
 function module.setCanvasScale(scale)
@@ -112,9 +109,6 @@ end
 function module.setCanvasSize(width, height)
   canvasWidth = width
   canvasHeight = height
-
-  playbit.graphics.shader:send("width", width)
-  playbit.graphics.shader:send("height", height)
 end
 
 --- Returns the current canvas size.
@@ -150,9 +144,6 @@ function module.setWindowSize(width, height)
 
   canvasX = (windowWidth - canvasWidth * canvasScale) / 2
   canvasY = (windowHeight - canvasHeight * canvasScale) / 2
-
-  playbit.graphics.shader:send("width", width)
-  playbit.graphics.shader:send("height", height)
 end
 
 --- Returns the current window size.
@@ -195,13 +186,20 @@ function module.updateFramebufferCanvas()
   -- copy current frame into framebuffer
   local r, g, b = love.graphics.getColor()
   local currentCanvas = love.graphics.getCanvas()
+
+  local framebufferWidth, framebufferHeight = currentCanvas:getDimensions()
+  
+  -- TODO resize the framebuffer if needed and send the framebuffer size to the shader
+  if framebufferWidth ~= playbit.graphics.frameBufferCanvas:getWidth() or framebufferHeight ~= playbit.graphics.frameBufferCanvas:getHeight() then
+    playbit.graphics.frameBufferCanvas = love.graphics.newCanvas(framebufferWidth, framebufferHeight)
+  end
   
   -- TODO resize the framebuffer if needed and send the framebuffer size to the shader
   love.graphics.setCanvas(playbit.graphics.frameBufferCanvas)
   love.graphics.clear()
   love.graphics.setColor(1, 1, 1, 1)
   love.graphics.setShader()
-  love.graphics.draw(playbit.graphics.canvas)
+  love.graphics.draw(currentCanvas)
   love.graphics.setCanvas({currentCanvas, stencil=true})
   love.graphics.setShader(playbit.graphics.shader)
   love.graphics.setColor(r, g, b, 1)

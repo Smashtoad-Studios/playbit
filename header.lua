@@ -47,10 +47,6 @@ function love.draw()
   local canvasHeight = playbit.graphics.canvas:getHeight()
   if canvasWidth ~= newCanvasWidth or canvasHeight ~= newCanvasHeight then
     playbit.graphics.canvas = love.graphics.newCanvas(newCanvasWidth, newCanvasHeight)
-    playbit.graphics.frameBufferCanvas = love.graphics.newCanvas(newCanvasWidth, newCanvasHeight)
-
-    playbit.graphics.shader:send("width", newCanvasWidth)
-    playbit.graphics.shader:send("height", newCanvasHeight)
   end
 
   -- must be changed at start of frame - love2d doesn't allow changing window size with canvas active
