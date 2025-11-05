@@ -70,6 +70,11 @@ function meta:drawText(str, x, y, width, height, leadingAdjustment, wrapMode, al
   @@ASSERT(leadingAdjustment == nil, "[ERR] Parameter leadingAdjustment is not yet implemented.")
   @@ASSERT(wrapMode == nil, "[ERR] Parameter wrapMode is not yet implemented.")
   @@ASSERT(alignment == nil, "[ERR] Parameter alignment is not yet implemented.")
+
+  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
+    playbit.graphics.updateFramebufferCanvas()
+  end
+  
   local currentFont = love.graphics.getFont()
   love.graphics.setFont(self.data)
   love.graphics.print(str, x, y)
@@ -89,6 +94,10 @@ function meta:drawTextAligned(str, x, y, alignment, leadingAdjustment)
     x = x - width * 0.5  
   end
   -- left, draw normally
+
+  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
+    playbit.graphics.updateFramebufferCanvas()
+  end
   
   local currentFont = love.graphics.getFont()
   love.graphics.setFont(self.data)

@@ -420,10 +420,6 @@ function module.drawText(text, x, y, width, height, fontFamily, leadingAdjustmen
 
   @@ASSERT(text ~= nil, "Text is nil")
 
-  if playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeXOR or playbit.graphics.activeContext.drawMode == playdate.graphics.kDrawModeNXOR then
-    playbit.graphics.updateFramebufferCanvas()
-  end
-
   local font = playbit.graphics.activeContext.fontFamily[playdate.graphics.font.kVariantNormal]
   font:drawText(text, x, y, width, height, leadingAdjustment, wrapMode, alignmen)
   playbit.graphics.updateContext()
