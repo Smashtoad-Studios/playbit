@@ -40,7 +40,7 @@ function module:setVolume(volume)
 end
 
 function module:getVolume()
-  error("[ERR] playdate.sound.channel:getVolume() is not yet implemented.")
+  return self.volume
 end
 
 function module:setPan(pan)

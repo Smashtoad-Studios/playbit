@@ -23,7 +23,19 @@ function module.encodePretty(table)
   print("[ERR] json.encodePretty() is not yet implemented.")
 end
 
--- TODO: handle overloaded signature (file, pretty, table) - where `file` is a playdate.file.file
 function module.encodeToFile(path, pretty, table)
-  print("[ERR] json.encodeToFile() is not yet implemented.")
+  -- If tthe table is passed in as the second argument set the table
+  if type(pretty) == "table" then
+    table = pretty
+  end
+
+  -- Extract the directory path from the full file path
+  local directory = path:match("(.*/)")
+
+  -- If a directory path exists, create it
+  if directory then
+    love.filesystem.createDirectory(directory)
+  end
+
+  local success, message = love.filesystem.write(path, jsonParser.encode(table))
 end
