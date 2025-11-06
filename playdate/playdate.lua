@@ -307,7 +307,7 @@ function love.wheelmoved(x, y)
 
   local currentInputHandler = inputHandlerStack[#inputHandlerStack]
   if currentInputHandler then
-    local accelFactor = math.max(playdate.easingFunctions.linear(math.abs(diff), 0.4, 4.6, 180.0), 5.0)
+    local accelFactor = math.min(playdate.easingFunctions.linear(math.abs(diff), 0.4, 4.6, 180.0), 5.0)
     if currentInputHandler.handler.cranked then
       currentInputHandler.handler.cranked(diff, diff * accelFactor)
     end
@@ -426,7 +426,7 @@ function module.updateInput()
       local diff = crankPos - lastCrankPos
       local currentInputHandler = inputHandlerStack[#inputHandlerStack]
       if currentInputHandler then
-        local accelFactor = math.max(playdate.easingFunctions.linear(math.abs(diff), 0.4, 4.6, 180.0), 5.0)
+        local accelFactor = math.min(playdate.easingFunctions.linear(math.abs(diff), 0.4, 4.6, 180.0), 5.0)
         if currentInputHandler.handler.cranked then
           currentInputHandler.handler.cranked(diff, diff * accelFactor)
         end
