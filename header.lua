@@ -176,4 +176,9 @@ function love.run()
 	end
 end
 
+function love.quit()
+  playdate.gameWillTerminate()
+  return false
+end
+
 !end
