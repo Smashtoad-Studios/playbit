@@ -51,7 +51,7 @@ function meta:init(imageOrTilemap)
     -- TODO-Playbit: Support timemaps
     if imageOrTilemap then
         self:setImage(imageOrTilemap)
-    else
+    elseif self.image == nil then
         self:setSize(0, 0)
     end
     self:moveTo(0, 0)
