@@ -24,6 +24,10 @@ function sampleplayer.meta:copy()
 end
 
 function sampleplayer.meta:play(repeatCount, rate)
+  if self:isPlaying() then
+    self:stop()
+  end
+
   -- TODO: repeat count
   if rate then
     self.data:setPitch(rate)
@@ -52,8 +56,14 @@ function sampleplayer.meta:getLength()
   return self.data:getDuration()
 end
 
-function sampleplayer.meta:setFinishCallback()
-  print("[WARN] playdate.sound.sampleplayer:setFinishCallback() is not yet implemented.")
+function sampleplayer.meta:setFinishCallback(func, ...)
+  if type(func) == "function" then
+    self.finishCallback = func
+  else
+    error("[ERR] playdate.sound.sampleplayer:setFinishCallback() expects a function")
+  end
+
+  self.finishCallbackArgs = ...
 end
 
 function sampleplayer.meta:setVolume(value)
@@ -89,6 +99,9 @@ function fileplayer.new(path, bufferSize)
   -- TODO: is there a way to use bufferSize to control Love2D chunks?
   local sample = setmetatable({}, fileplayer.meta)
   sample.data = love.audio.newSource(path..".wav", "stream")
+  sample.channelVolume = 1
+  sample.volume = 1
+
   return sample
 end
 
@@ -116,8 +129,18 @@ function fileplayer.meta:isPlaying()
   return self.data:isPlaying()
 end
 
-function fileplayer.meta:setVolume(value)
-  self.data:setVolume(value)
+function fileplayer.meta:setVolume(volume)
+  self.volume = volume
+
+  -- The channel acts as a master volume
+  self.data:setVolume(self.volume * self.channelVolume)
+end
+
+function fileplayer.meta:channelVolumeChanged(volume)
+  self.channelVolume = volume
+
+  -- The channel acts as a master volume
+  self.data:setVolume(self.volume * self.channelVolume)
 end
 
 function fileplayer.meta:getVolume()
@@ -238,6 +261,7 @@ end
 
 -- docs: https://sdk.play.date/3.0.0/Inside%20Playdate.html#C-sound.channel 
 local channel = {}
+local channels = {}
 playdate.sound.channel = channel
 channel.meta = {}
 channel.meta.__index = channel.meta
@@ -246,11 +270,18 @@ function channel.new()
   local newChannel = setmetatable({}, channel.meta)
   newChannel.sources = {}
   newChannel.volume = 1.0
+
+  channels[#channels + 1] = newChannel
+
   return newChannel
 end
 
 function channel.meta:remove()
-  error("[ERR] playdate.sound.channel:getSize() is not yet implemented.")
+    for i = 1, #channels, 1 do
+    if channels[i] == self then
+      table.remove(channels, i)
+    end
+  end
 end
 
 function channel.meta:addEffect(effect)
@@ -262,24 +293,30 @@ function channel.meta:removeEffect(effect)
 end
 
 function channel.meta:addSource(source)
+  source:channelVolumeChanged(self.volume)
   self.sources[#self.sources + 1] = source
 end
 
 function channel.meta:removeSource(source)
-  error("[ERR] playdate.sound.channel:removeSource() is not yet implemented.")
+  source:channelVolumeChanged(1)
+
+  for i = 1, #self.sources, 1 do
+    if self.sources[i] == source then
+      table.remove(self.sources, i)
+    end
+  end
 end
 
 function channel.meta:setVolume(volume)
-  print("[WARN] playdate.sound.channel:setVolume() is not fully implemented.")
   self.volume = volume
+
   for i=1, #self.sources do
-    -- TODO-Playbit: this isn't quite right, but will maybe work for now
-    self.sources[i]:setVolume(volume)
+    self.sources[i]:channelVolumeChanged(volume)
   end
 end
 
 function channel.meta:getVolume()
-  error("[ERR] playdate.sound.channel:getVolume() is not yet implemented.")
+  return self.volume
 end
 
 function channel.meta:setPan(pan)
