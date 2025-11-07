@@ -89,6 +89,14 @@ function meta:draw(x, y, flip, qx, qy, qw, qh)
   local sx = 1
   local sy = 1
   if flip then
+    if "flipX" == flip then
+      flip = playdate.graphics.kImageFlippedX
+    elseif "flipY" == flip then
+      flip = playdate.graphics.kImageFlippedY
+    elseif "flipXY" == flip then
+      flip = playdate.graphics.kImageFlippedXY
+    end
+
     local w = self.data:getWidth()
     local h = self.data:getHeight()
     if flip == playdate.graphics.kImageFlippedX then
