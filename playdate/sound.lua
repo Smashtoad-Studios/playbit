@@ -214,8 +214,8 @@ function fileplayer.meta:setVolume(left, right, fadeSeconds, fadeCallback, arg)
   self.fadeSeconds = fadeSeconds
 
   -- Fade from the current volume to the specified volume if fadeSeconds is passed in
-  if self.fadeSeconds ~= nil then
-    local fadeTimer = playdate.timer.new(fadeSeconds * 1000, self.volume, left)
+  if self.fadeSeconds ~= nil and self.fadeSeconds ~= 0 then
+    local fadeTimer = playdate.timer.new(self.fadeSeconds * 1000, self.volume, left)
 
     fadeTimer.updateCallback = function (timer)
       self.volume = timer.value
@@ -446,7 +446,7 @@ function channel.meta:setVolume(volume)
   self.volume = volume
 
   for i=1, #self.sources do
-    self.sources[i]:channelVolumeChanged(volume)
+    self.sources[i]:channelVolumeChanged(self.volume)
   end
 end
 
