@@ -3,6 +3,60 @@
 playdate.sound = {}
 
 local sampleplayer = {}
+local playingSamplePlayers = {}
+
+local function setFinishCallback(player, func, arg)
+  if type(func) == "function" then
+    player.finishCallback = func
+  else
+    error("[ERR] setFinishCallback() expects a function")
+  end
+
+  player.finishCallbackArg = arg
+end
+
+local function callPlayerFinishedCallback(player)
+  if player.finishCallback ~= nil then
+    -- First argument is always the player then the optional arg
+    player.finishCallback(self, player.finishCallbackArg)
+  end
+end
+
+local function updatePlayingPlayers(players)
+  -- Iterate back-to-front to avoid skipping over elements when removing
+  for i = #players, 1, -1 do
+    if not players[i]:isPlaying() then
+      -- Repeat count was passed in when played
+      if players[i].repeatCount then
+        -- Increment number of times this player was repeated
+        players[i].currentRepeatCount = players[i].currentRepeatCount + 1
+        
+        -- This player is still repeating then play
+        if players[i].currentRepeatCount < players[i].repeatCount then
+          players[i].data:play()
+          return
+        end
+      end
+
+      callPlayerFinishedCallback(players[i])
+
+      table.remove(players, i)
+    end
+  end
+end
+
+local function playerStop(player, playingPlayers)
+  player.data:stop()
+
+  callPlayerFinishedCallback(player)
+
+  for i = 1, #playingPlayers, 1 do
+    if playingPlayers[i] == player then
+      table.remove(playingPlayers, i)
+    end
+  end
+end
+
 playdate.sound.sampleplayer = sampleplayer
 sampleplayer.meta = {}
 sampleplayer.meta.__index = sampleplayer.meta
@@ -17,6 +71,10 @@ function sampleplayer.new(path)
   return sample
 end
 
+function sampleplayer.update()
+  updatePlayingPlayers(playingSamplePlayers)
+end
+
 function sampleplayer.meta:copy()
   local sample = setmetatable({}, sampleplayer.meta)
   sample.data = self.data:clone()
@@ -28,24 +86,26 @@ function sampleplayer.meta:play(repeatCount, rate)
     self:stop()
   end
 
-  -- TODO: repeat count
   if rate then
     self.data:setPitch(rate)
   end
 
   if repeatCount then
-    -- TODO: specific repeat count
-    if repeatCount == 0 then
+    self.repeatCount = repeatCount
+    self.currentRepeatCount = 0
+
+    if self.repeatCount == 0 then
       -- loop endlessly
       self.data:setLooping(true)
     end
   end
 
   self.data:play()
+  playingSamplePlayers[#playingSamplePlayers + 1] = self
 end
 
 function sampleplayer.meta:stop()
-  self.data:stop()
+  playerStop(self, playingSamplePlayers)
 end
 
 function sampleplayer.meta:isPlaying()
@@ -56,18 +116,12 @@ function sampleplayer.meta:getLength()
   return self.data:getDuration()
 end
 
-function sampleplayer.meta:setFinishCallback(func, ...)
-  if type(func) == "function" then
-    self.finishCallback = func
-  else
-    error("[ERR] playdate.sound.sampleplayer:setFinishCallback() expects a function")
-  end
-
-  self.finishCallbackArgs = ...
+function sampleplayer.meta:setFinishCallback(func, arg)
+  setFinishCallback(self, func, arg)
 end
 
-function sampleplayer.meta:setVolume(value)
-  self.data:setVolume(value)
+function sampleplayer.meta:setVolume(volume)
+  self.data:setVolume(volume)
 end
 
 function sampleplayer.meta:getVolume()
@@ -91,9 +145,13 @@ function sampleplayer.meta:getRate()
 end
 
 local fileplayer = {}
+local playingFilePlayers = {}
+
 playdate.sound.fileplayer = fileplayer
 fileplayer.meta = {}
 fileplayer.meta.__index = fileplayer.meta
+
+
 
 function fileplayer.new(path, bufferSize)
   -- TODO: is there a way to use bufferSize to control Love2D chunks?
@@ -105,20 +163,31 @@ function fileplayer.new(path, bufferSize)
   return sample
 end
 
+function fileplayer.update()
+  updatePlayingPlayers(playingFilePlayers)
+end
+
+function fileplayer.meta:load(path)
+  print("[WARN] playdate.sound.fileplayer:load() is not yet implemented")
+end
+
 function fileplayer.meta:play(repeatCount)
   if repeatCount then
-    -- TODO: specific repeat count
-    if repeatCount == 0 then
+    self.repeatCount = repeatCount
+    self.currentRepeatCount = 0
+
+    if self.repeatCount == 0 then
       -- loop endlessly
       self.data:setLooping(true)
     end
   end
 
   self.data:play()
+  playingFilePlayers[#playingFilePlayers + 1] = self
 end
 
 function fileplayer.meta:stop()
-  self.data:stop()
+  playerStop(self, playingFilePlayers)
 end
 
 function fileplayer.meta:pause(value)
@@ -129,14 +198,80 @@ function fileplayer.meta:isPlaying()
   return self.data:isPlaying()
 end
 
-function fileplayer.meta:setVolume(volume)
-  self.volume = volume
-
-  -- The channel acts as a master volume
-  self.data:setVolume(self.volume * self.channelVolume)
+function fileplayer.meta:getLength()
+  return self.data:getDuration("seconds")
 end
 
+-- left, [right, [fadeSeconds, [fadeCallback, [arg]]]]
+function fileplayer.meta:setVolume(left, right, fadeSeconds, fadeCallback, arg)
+  @@ASSERT(type(left) == "number", "[ERR] playdate.sound.fileplayer.setVolume \"left\" needs to be a number")
+  @@ASSERT((left >= 0 and left <= 1), "[ERR] playdate.sound.fileplayer.setVolume \"left\" needs to be between 0 and 1")
+
+  -- print("[WARN] playdate.sound.fileplayer:setVolume() right parameter is not used yet")
+  @@ASSERT(fadeSeconds == nil or type(fadeSeconds) == "number", "[ERR] playdate.sound.fileplayer.setVolume \"fadeSeconds\" needs to be a number")
+  @@ASSERT(fadeCallback == nil or type(fadeCallback) == "function", "[ERR] playdate.sound.fileplayer.setVolume \"fadeCallback\" needs to be a number")
+
+  self.fadeSeconds = fadeSeconds
+
+  -- Fade from the current volume to the specified volume if fadeSeconds is passed in
+  if self.fadeSeconds ~= nil then
+    local fadeTimer = playdate.timer.new(fadeSeconds * 1000, self.volume, left)
+
+    fadeTimer.updateCallback = function (timer)
+      self.volume = timer.value
+      -- The channel acts as a master volume
+      self.data:setVolume(self.volume * self.channelVolume)
+    end
+
+    fadeTimer.timerEndedCallback = function ()
+      if fadeCallback ~= nil then
+        -- The fileplayer object is passed as the first argument to the callback, and the optional arg argument is passed as the second
+        fadeCallback(self, arg)
+      end
+    end
+
+    return
+  end
+
+  self.volume = left
+
+  -- The channel acts as a master volume
+  -- Set volume instantly
+  self.data:setVolume(self.volume * self.channelVolume)
+  if fadeCallback ~= nil then
+    -- The fileplayer object is passed as the first argument to the callback, and the optional arg argument is passed as the second
+    fadeCallback(self, arg)
+  end
+end
+
+function fileplayer.meta:setFinishCallback(func, arg)
+  setFinishCallback(self, func, arg)
+end
+
+function fileplayer.meta:didUnderrun()
+  print("[WARN] playdate.sound.fileplayer:didUnderrun() is not yet implemented")
+end
+
+function fileplayer.meta:setStopOnUnderrun(flag)
+  print("[WARN] playdate.sound.fileplayer:setStopOnUnderrun() is not yet implemented")
+end
+
+-- start, [end, [loopCallback, [arg]]]
+function fileplayer.meta:setLoopRange(startSeconds, endSeconds, loopCallback, arg)
+  print("[WARN] playdate.sound.fileplayer:setLoopRange() is not yet implemented")
+end
+
+function fileplayer.meta:setLoopCallback(callback, arg)
+  print("[WARN] playdate.sound.fileplayer:setLoopCallback() is not yet implemented")
+end
+
+function fileplayer.meta:setBufferSize(seconds)
+  print("[WARN] playdate.sound.fileplayer:setBufferSize() is not yet implemented")
+end
+
+-- NOT A NATIVE PLAYDATE FUNCTION
 function fileplayer.meta:channelVolumeChanged(volume)
+  @@ASSERT(type(volume) == "number", "[ERR] playdate.sound.fileplayer.channelVolumeChanged volume needs to be a number")
   self.channelVolume = volume
 
   -- The channel acts as a master volume
@@ -155,16 +290,16 @@ function fileplayer.meta:getRate(rate)
   self.data:getPitch()
 end
 
-function fileplayer.meta:setOffset(value)
-  self.data:seek(value)
+function fileplayer.meta:setRateMod(signal)
+  print("[WARN] playdate.sound.fileplayer:setRateMod() is not yet implemented")
+end
+
+function fileplayer.meta:setOffset(seconds)
+  self.data:seek(seconds)
 end
 
 function fileplayer.meta:getOffset()
   return self.data:tell()
-end
-
-function fileplayer.meta:getLength()
-  return self.data:getDuration("seconds")
 end
 
 -- TODO: synth

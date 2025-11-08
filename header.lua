@@ -124,6 +124,10 @@ function love.draw()
   -- update emulated input
   playdate.updateInput()
   playdate.graphics.animation.loop.update()
+   -- TODO-Playbit: not a native Playdate SDK functions. Move to Playbit?
+   playdate.sound.sampleplayer.update()
+   -- TODO-Playbit: not a native Playdate SDK functions. Move to Playbit?
+  playdate.sound.fileplayer.update()
 end
 
 function love.resize(w, h)
