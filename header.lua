@@ -177,7 +177,9 @@ function love.run()
 end
 
 function love.quit()
-  playdate.gameWillTerminate()
+  if playdate.gameWillTerminate ~= nil then
+    playdate.gameWillTerminate()
+  end
   return false
 end
 
