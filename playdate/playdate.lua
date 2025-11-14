@@ -246,7 +246,7 @@ function module.getCrankPosition()
 end
 
 function module.setCrankSoundsDisabled(disable)
-  print("[WARN] playdate.setCrankSoundsDisabled() has no effect.")
+  playbit.logger.printWarning("playdate.setCrankSoundsDisabled() has no effect.")
 end
 
 function love.joystickadded(joystick)

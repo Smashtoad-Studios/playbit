@@ -126,7 +126,7 @@ end
 
 function meta:setImageDrawMode(mode)
     self.drawMode = mode
-    print("[WARN] playdate.graphics.sprite:setImageDrawMode() is not fully tested.")
+    playbit.logger.printWarning("playdate.graphics.sprite:setImageDrawMode() is not fully tested.")
 end
 
 function meta:setSize(w, h)
@@ -194,7 +194,7 @@ function meta:removeAnimator(animator)
 end
 
 function meta:markDirty()
-    print("[WARN] playdate.graphics.sprite:markDirty() is not yet implemented.")
+    playbit.logger.printWarning("playdate.graphics.sprite:markDirty() is not yet implemented.")
 end
 
 function meta:setCollideRect(x, y, w, h)
@@ -275,7 +275,7 @@ end
 
 function meta:setIgnoresDrawOffset(flag)
     -- TODO-Playbit: Implement ignore draw offset
-    print("[WARN] playdate.graphics.sprite setIgnoresDrawOffset() does not yet have any effect.")
+    playbit.logger.printWarning("playdate.graphics.sprite setIgnoresDrawOffset() does not yet have any effect.")
     self.ignoresDrawOffset = flag
 end
 

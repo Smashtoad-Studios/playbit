@@ -156,7 +156,7 @@ function module.setImageDrawMode(mode)
   elseif mode == module.kDrawModeInverted or mode == "inverted" then
     playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeInverted)
   else
-    print("[WARN] Draw mode '"..mode.."' is not yet implemented.")
+    playbit.logger.printWarning("Draw mode '"..mode.."' is not yet implemented.")
     playbit.graphics.shader:send(playbit.graphics.MODE_KEY, module.kDrawModeCopy)
   end
 end
@@ -220,7 +220,7 @@ end
 
 function module.setStrokeLocation(location)
   playbit.graphics.activeContext.strokeLocation = location
-  print("[WARN] playdate.graphics.setStrokeLocation() has no effect")
+  playbit.logger.printWarning("playdate.graphics.setStrokeLocation() has no effect")
 end
 
 function module.getStrokeLocation()
@@ -248,7 +248,7 @@ end
 function module.drawRoundRect(x, y, width, height, radius)
   -- TODO: love's rectangle function doesn't draw the same way as Playdate's
   -- TODO-Playbit: Figure out what is different here
-  print("[WARN] playdate.graphics.drawRoundRect() does not draw exactly the same as on Playdate.")
+  playbit.logger.printWarning("playdate.graphics.drawRoundRect() does not draw exactly the same as on Playdate.")
 
   setPatternDrawModeAndColor()
   
@@ -261,7 +261,7 @@ end
 function module.fillRoundRect(x, y, width, height, radius)
   -- TODO: love's rectangle function doesn't draw the same way as Playdate's
   -- TODO-Playbit: Figure out what is different here
-  print("[WARN] playdate.graphics.fillRoundRect() does not draw exactly the same as on Playdate.")
+  playbit.logger.printWarning("playdate.graphics.fillRoundRect() does not draw exactly the same as on Playdate.")
 
   setPatternDrawModeAndColor()
   
@@ -276,14 +276,14 @@ function module.fillEllipseInRect(xOrRect, y, width, height, startAngle, endAngl
 
   -- TODO-Playbit: support all params
   if startAngle or endAngle then
-    print("[WARN] playdate.graphics.fillEllipseInRect() does not support start or end angle.")
+    playbit.logger.printWarning("playdate.graphics.fillEllipseInRect() does not support start or end angle.")
   end
   local radiusX = math.floor(width / 2)
   local radiusY = math.floor(height / 2)
   local centerX = xOrRect + radiusX
   local centerY = y + radiusY
   love.graphics.ellipse("fill", centerX, centerY, radiusX, radiusY)
-  print("[WARN] playdate.graphics.fillEllipseInRect() does not draw exactly the same as on Playdate.")
+  playbit.logger.printWarning("playdate.graphics.fillEllipseInRect() does not draw exactly the same as on Playdate.")
   playbit.graphics.updateContext()
 
   module.setImageDrawMode(playbit.graphics.activeContext.drawMode)
@@ -300,7 +300,7 @@ end
 
 function module.setLineCapStyle(style)
   playbit.graphics.activeContext.lineCapStyle = style
-  print("[WARN] playdate.graphics.setLineCapStyle() has no effect")
+  playbit.logger.printWarning("playdate.graphics.setLineCapStyle() has no effect")
 end
 
 -- TODO-Playbit: Handle just an arc parameter
@@ -363,7 +363,7 @@ function module.setFont(font, variant)
 end
 
 function module.setFontFamily(fontFamily)
-  print("[WARN] playdate.graphics.setFontFamily() is not yet fully implemented.")
+  playbit.logger.printWarning("playdate.graphics.setFontFamily() is not yet fully implemented.")
   -- TODO: should it only overwrite the values that are present in the new font family?
   playbit.graphics.activeContext.fontFamily = fontFamily
   local normalFont = fontFamily[playdate.graphics.font.kVariantNormal]
@@ -602,7 +602,7 @@ end
 
 function module.setClipRect(xOrRect, y, width, height)
   -- playbit.graphics.activeContext.clipRect = 
-  print("[WARN] playdate.graphics.setClipRect() is not yet implemented.")
+  playbit.logger.printWarning("playdate.graphics.setClipRect() is not yet implemented.")
 end
 
 function module.getClipRect()
@@ -611,7 +611,7 @@ end
 
 function module.setScreenClipRect(xOrRect, y, width, height)
   -- TODO: save this to graphics context
-  print("[WARN] playdate.graphics.setScreenClipRect() has no effect.")
+  playbit.logger.printWarning("playdate.graphics.setScreenClipRect() has no effect.")
 end
 
 function module.getScreenClipRect()
@@ -620,13 +620,13 @@ end
 
 function module.clearClipRect()
   playbit.graphics.activeContext.clipRect = nil
-  print("[WARN] playdate.graphics.clearScreenClipRect() has no effect.")
+  playbit.logger.printWarning("playdate.graphics.clearScreenClipRect() has no effect.")
 end
 
 function module.setStencilImage(image, tile)
   playbit.graphics.activeContext.stencilImage = image
   playbit.graphics.activeContext.tileStencilImage = tile
-  print("[WARN] playdate.graphics.setStencilImage() has no effect.")
+  playbit.logger.printWarning("playdate.graphics.setStencilImage() has no effect.")
 end
 
 -- TODO handle overloaded parameters
@@ -634,17 +634,17 @@ end
 -- function module.setStencilPattern(level, ditherType)
 function module.setStencilPattern(pattern)
   playbit.graphics.activeContext.pattern = pattern
-  print("[WARN] playdate.graphics.setStencilPattern() has no effect.")
+  playbit.logger.printWarning("playdate.graphics.setStencilPattern() has no effect.")
 end
 
 function module.clearStencil()
   playbit.graphics.activeContext.stencilImage = nil
   playbit.graphics.activeContext.tileStencilImage = false
-  print("[ERR] playdate.graphics.clearStencil() is not yet implemented.")
+  playbit.logger.printError("playdate.graphics.clearStencil() is not yet implemented.")
 end
 
 function module.clearStencilImage()
   playbit.graphics.activeContext.stencilImage = nil
   playbit.graphics.activeContext.tileStencilImage = false
-  print("[ERR] playdate.graphics.clearStencilImage() is not yet implemented.")
+  playbit.logger.printError("playdate.graphics.clearStencilImage() is not yet implemented.")
 end

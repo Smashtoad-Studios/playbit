@@ -18,7 +18,7 @@ local function newNumberOrPointAnimator(type, startValue, endValue, easingFuncti
     newAnimator.easingFunction = easingFunction or playdate.easingFunctions.linear
     newAnimator.startTimeOffset = startTimeOffset or 0
     if startTimeOffset ~= nil then
-        print("[WARN] startTimeOffset for animator of type '" .. type .. "' is not implemented")
+        playbit.logger.printWarning("startTimeOffset for animator of type '" .. type .. "' is not implemented")
     end
     return newAnimator
 end
@@ -30,7 +30,7 @@ local function newGeometryAnimator(type, geom, easingFunction, startTimeOffset)
     newAnimator.easingFunction = easingFunction or playdate.easingFunctions.linear
     newAnimator.startTimeOffset = startTimeOffset or 0
     if startTimeOffset ~= nil then
-        print("[WARN] startTimeOffset for animator of type '" .. type .. "' is not implemented")
+        playbit.logger.printWarning("startTimeOffset for animator of type '" .. type .. "' is not implemented")
     end
     return newAnimator
 end
@@ -75,7 +75,7 @@ function module.new(duration, a, b, c, d)
     elseif a.type == "arc" then
         newAnimator = newGeometryAnimator("arc", a, b, c)
     elseif a.type == "polygon" then
-        print("[WARN] animator for type 'polygon' is not fully implemented.")
+        playbit.logger.printWarning("animator for type 'polygon' is not fully implemented.")
         newAnimator = newGeometryAnimator("polygon", a, b, c)
     elseif type(a) == "table" and type(b) == "table" then
         newAnimator = newPartsAnimator(duration, a, b, c)
@@ -115,7 +115,7 @@ function meta:valueAtTime(time)
         local distance = self.easingFunction(time, 0, self.geometry:length(), self.duration, self.easingAmplitude, self.easingPeriod)
         return self.geometry:pointOnArc(distance, true)
     else
-        print("[WARN] playdate.graphics.animator:valueAtTime() is not yet implemented for animator of type: '" .. self.type .. "'")
+        playbit.logger.printWarning("playdate.graphics.animator:valueAtTime() is not yet implemented for animator of type: '" .. self.type .. "'")
         return {x = 0, y = 0}
     end
 end

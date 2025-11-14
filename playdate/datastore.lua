@@ -11,7 +11,7 @@ function module.write(table, filename, prettyPrint)
   prettyPrint = prettyPrint or false
   -- TODO: json lib doesn't support pretty printing
   if prettyPrint then
-    print("[WARN] datastore.write() prettyPrint parameter is not yet implemented.")
+    playbit.logger.printWarning("datastore.write() prettyPrint parameter is not yet implemented.")
   end
   local str = jsonParser.encode(table)
   love.filesystem.write(filename, str)

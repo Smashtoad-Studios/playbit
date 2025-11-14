@@ -4,21 +4,21 @@ local running = false
 
 playdate.startAccelerometer = playdate.startAccelerometer or function()
     running = true
-    print("[ERR] playdate.startAccelerometer() is not yet implemented.")
+    playbit.logger.printError("playdate.startAccelerometer() is not yet implemented.")
 end
 
 playdate.stopAccelerometer = playdate.stopAccelerometer or function()
     running = false
-    print("[ERR] playdate.stopAccelerometer() is not yet implemented.")
+    playbit.logger.printError("playdate.stopAccelerometer() is not yet implemented.")
 end
 
 playdate.readAccelerometer = playdate.readAccelerometer or function()
-    print("[WARN] playdate.readAccelerometer() is not yet implemented.")
+    playbit.logger.printWarning("playdate.readAccelerometer() is not yet implemented.")
     return 0,1,0 --upright
 end
 
 playdate.accelerometerIsRunning = playdate.accelerometerIsRunning or function()
-    -- print("[ERR] playdate.accelerometerIsRunning() is not yet implemented.")
+    -- playbit.logger.printError("playdate.accelerometerIsRunning() is not yet implemented.")
     return running
 end
 
