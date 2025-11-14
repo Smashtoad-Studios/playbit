@@ -168,7 +168,7 @@ function fileplayer.update()
 end
 
 function fileplayer.meta:load(path)
-  print("[WARN] playdate.sound.fileplayer:load() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.fileplayer:load() is not yet implemented")
 end
 
 function fileplayer.meta:play(repeatCount)
@@ -207,7 +207,7 @@ function fileplayer.meta:setVolume(left, right, fadeSeconds, fadeCallback, arg)
   @@ASSERT(type(left) == "number", "[ERR] playdate.sound.fileplayer.setVolume \"left\" needs to be a number")
   @@ASSERT((left >= 0 and left <= 1), "[ERR] playdate.sound.fileplayer.setVolume \"left\" needs to be between 0 and 1")
 
-  -- print("[WARN] playdate.sound.fileplayer:setVolume() right parameter is not used yet")
+  -- playbit.logger.printWarning("playdate.sound.fileplayer:setVolume() right parameter is not used yet")
   @@ASSERT(fadeSeconds == nil or type(fadeSeconds) == "number", "[ERR] playdate.sound.fileplayer.setVolume \"fadeSeconds\" needs to be a number")
   @@ASSERT(fadeCallback == nil or type(fadeCallback) == "function", "[ERR] playdate.sound.fileplayer.setVolume \"fadeCallback\" needs to be a number")
 
@@ -249,24 +249,24 @@ function fileplayer.meta:setFinishCallback(func, arg)
 end
 
 function fileplayer.meta:didUnderrun()
-  print("[WARN] playdate.sound.fileplayer:didUnderrun() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.fileplayer:didUnderrun() is not yet implemented")
 end
 
 function fileplayer.meta:setStopOnUnderrun(flag)
-  print("[WARN] playdate.sound.fileplayer:setStopOnUnderrun() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.fileplayer:setStopOnUnderrun() is not yet implemented")
 end
 
 -- start, [end, [loopCallback, [arg]]]
 function fileplayer.meta:setLoopRange(startSeconds, endSeconds, loopCallback, arg)
-  print("[WARN] playdate.sound.fileplayer:setLoopRange() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.fileplayer:setLoopRange() is not yet implemented")
 end
 
 function fileplayer.meta:setLoopCallback(callback, arg)
-  print("[WARN] playdate.sound.fileplayer:setLoopCallback() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.fileplayer:setLoopCallback() is not yet implemented")
 end
 
 function fileplayer.meta:setBufferSize(seconds)
-  print("[WARN] playdate.sound.fileplayer:setBufferSize() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.fileplayer:setBufferSize() is not yet implemented")
 end
 
 -- NOT A NATIVE PLAYDATE FUNCTION
@@ -291,7 +291,7 @@ function fileplayer.meta:getRate(rate)
 end
 
 function fileplayer.meta:setRateMod(signal)
-  print("[WARN] playdate.sound.fileplayer:setRateMod() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.fileplayer:setRateMod() is not yet implemented")
 end
 
 function fileplayer.meta:setOffset(seconds)
@@ -311,87 +311,87 @@ synth.meta = {}
 synth.meta.__index = synth.meta
 
 function synth.new()
-  print("[WARN] playdate.sound.synth is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth is not yet implemented")
   local newSynth = setmetatable({}, synth.meta)
   return newSynth
 end
 
 function synth.meta:playNote(pitch, volume, length, when)
-  print("[WARN] playdate.sound.synth:playNote() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:playNote() is not yet implemented")
 end
 
 function synth.meta:playMIDINote(note, volume, length, when)
-  print("[WARN] playdate.sound.synth:playMIDINote() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:playMIDINote() is not yet implemented")
 end
 
 function synth.meta:noteOff()
-  print("[WARN] playdate.sound.synth:noteOff() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:noteOff() is not yet implemented")
 end
 
 function synth.meta:isPlaying()
-  print("[WARN] playdate.sound.synth:isPlaying() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:isPlaying() is not yet implemented")
 end
 
 function synth.meta:setAmplitudeMod(signal)
-  print("[WARN] playdate.sound.synth:setAmplitudeMod() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:setAmplitudeMod() is not yet implemented")
 end
 
 function synth.meta:setADSR(attack, decay, sustain, release)
-  print("[WARN] playdate.sound.synth:setADSR() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:setADSR() is not yet implemented")
 end
 
 function synth.meta:setAttack(time)
-  print("[WARN] playdate.sound.synth:setAttack() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:setAttack() is not yet implemented")
 end
 
 function synth.meta:setDecay(time)
-  print("[WARN] playdate.sound.synth:setDecay() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:setDecay() is not yet implemented")
 end
 
 function synth.meta:setSustain(level)
-  print("[WARN] playdate.sound.synth:setSustain() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:setSustain() is not yet implemented")
 end
 
 function synth.meta:setRelease(time)
-  print("[WARN] playdate.sound.synth:setRelease() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:setRelease() is not yet implemented")
 end
 
 function synth.meta:clearEnvelope()
-  print("[WARN] playdate.sound.synth:clearEnvelope() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:clearEnvelope() is not yet implemented")
 end
 
 function synth.meta:setEnvelopeCurvature(amount)
-  print("[WARN] playdate.sound.synth:setEnvelopeCurvature() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:setEnvelopeCurvature() is not yet implemented")
 end
 
 function synth.meta:getEnvelope()
-  print("[WARN] playdate.sound.synth:getEnvelope() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:getEnvelope() is not yet implemented")
 end
 
 function synth.meta:setFinishCallback(callback)
-  print("[WARN] playdate.sound.synth:setFinishCallback() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:setFinishCallback() is not yet implemented")
 end
 
 
 function synth.meta:setFrequencyMod(signal)
-  print("[WARN] playdate.sound.synth:setFrequencyMod() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:setFrequencyMod() is not yet implemented")
 end
 
 function synth.meta:setLegato(flag)
-  print("[WARN] playdate.sound.synth:setLegato() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:setLegato() is not yet implemented")
 end
 
 
 function synth.meta:setVolume(left, right)
-  print("[WARN] playdate.sound.synth:setVolume() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:setVolume() is not yet implemented")
 end
 
 function synth.meta:setWaveform(waveform)
-  print("[WARN] playdate.sound.synth:setWaveform() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:setWaveform() is not yet implemented")
 end
 
 function synth.meta:setWavetable(sample, samplesize, xsize, ysize)
-  print("[WARN] playdate.sound.synth:setWavetable() is not yet implemented")
+  playbit.logger.printWarning("playdate.sound.synth:setWavetable() is not yet implemented")
 end
 
 -- docs: https://sdk.play.date/3.0.0/Inside%20Playdate.html#C-sound.channel 
@@ -485,20 +485,20 @@ function micinput.recordToSample(buffer, completionCallback)
 end
 
 function micinput.stopRecording()
-  print("[WARN] playdate.sound.micinput.stopRecording() is not yet implemented.")
+  playbit.logger.printWarning("playdate.sound.micinput.stopRecording() is not yet implemented.")
 end
 
 function micinput.startListening(source)
-  print("[WARN] playdate.sound.micinput.stopListening() is not yet implemented.")
+  playbit.logger.printWarning("playdate.sound.micinput.stopListening() is not yet implemented.")
   return true, nil
 end
 
 function micinput.stopListening()
-  print("[WARN] playdate.sound.micinput.stopListening() is not yet implemented.")
+  playbit.logger.printWarning("playdate.sound.micinput.stopListening() is not yet implemented.")
 end
 
 function micinput.getLevel()
-  print("[WARN] playdate.sound.micinput.getLevel() is not yet implemented.")
+  playbit.logger.printWarning("playdate.sound.micinput.getLevel() is not yet implemented.")
   return 0
 end
 
