@@ -1,5 +1,7 @@
 !if LOVE2D then
 require("playbit.graphics")
+require("playbit.logger")
+playbit.logger.setLoggerLevels({playbit.logger.LOGGER_LEVELS.ERROR, playbit.logger.LOGGER_LEVELS.WARNING})
 
 --[[ since there is no CoreLibs/playdate, this file should always 
 be included here so the methods are always available ]]--
@@ -181,7 +183,9 @@ function love.run()
 end
 
 function love.quit()
-  playdate.gameWillTerminate()
+  if playdate.gameWillTerminate ~= nil then
+    playdate.gameWillTerminate()
+  end
   return false
 end
 

@@ -16,11 +16,11 @@ function module.decodeFile(path)
 end
 
 function module.encode(table)
-  print("[ERR] json.encode() is not yet implemented.")
+  playbit.logger.printError("json.encode() is not yet implemented.")
 end
 
 function module.encodePretty(table)
-  print("[ERR] json.encodePretty() is not yet implemented.")
+  playbit.logger.printError("json.encodePretty() is not yet implemented.")
 end
 
 function module.encodeToFile(path, pretty, table)

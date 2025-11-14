@@ -209,7 +209,7 @@ function meta:drawRotated(x, y, angle, scale, yscale)
 end
 
 function meta:rotatedImage(angle, scale, yscale)
-  print("[ERR] playdate.graphics.image:rotatedImage() is not yet implemented.")
+  playbit.logger.printError("playdate.graphics.image:rotatedImage() is not yet implemented.")
   return self:copy()
 end
 
@@ -329,7 +329,7 @@ function meta:drawTiled(x, y, width, height, flip)
   playbit.graphics.shader:send("useMask", false)
   love.graphics.setColor(r, g, b, 1)
   playbit.graphics.updateContext()
-  print("[WARN] playdate.graphics.image:drawTiled() needs to be tested.")
+  playbit.logger.printWarning("playdate.graphics.image:drawTiled() needs to be tested.")
 end
 
 function meta:drawBlurred(x, y, radius, numPasses, ditherType, flip, xPhase, yPhase)
