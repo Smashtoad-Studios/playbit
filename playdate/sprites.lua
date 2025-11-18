@@ -291,10 +291,14 @@ end
 local function checkAABBCollision(self, other)
     if not self:canCollideWith(other) then return false end
     if not self.collideRect or not other.collideRect then return false end
-    return self.x + self.collideRect.x < other.x + other.collideRect.x + other.collideRect.width and
-            self.x + self.collideRect.x + self.collideRect.width > other.x + other.collideRect.x and
-            self.y + self.collideRect.y < other.y + other.collideRect.y + other.collideRect.height and
-            self.y + self.collideRect.y + self.collideRect.height > other.y + other.collideRect.y
+
+    local sLeftX, sTopY = self:getCenterPoint()
+    local oLeftX, oTopY = other:getCenterPoint()
+
+    return sLeftX + self.collideRect.x < oLeftX + other.collideRect.x + other.collideRect.width
+        and sLeftX + self.collideRect.x + self.collideRect.width > oLeftX + other.collideRect.x
+        and sTopY + self.collideRect.y < oTopY + other.collideRect.y + other.collideRect.height
+        and sTopY + self.collideRect.y + self.collideRect.height > oTopY + other.collideRect.y
 end
 
 
@@ -303,7 +307,9 @@ end
 local function entryExit(t0, t1, ds, sMin, sMax, oMin, oMax)
     -- If no movement along this axis, check for overlap (static collision case)
     if ds == 0 then
-        if sMin >= oMax or sMax <= oMin then return nil, nil end
+        if sMin >= oMax or sMax <= oMin then
+            return -1, -1
+        end
         return 0, 1  -- Overlapping, collision lasts full movement range
     end
 
@@ -312,7 +318,9 @@ local function entryExit(t0, t1, ds, sMin, sMax, oMin, oMax)
     local tExit = (oMax - sMin) / ds  -- Exit time (when leaving)
 
     -- Ensure proper ordering (entry should always be before exit)
-    if tEntry > tExit then tEntry, tExit = tExit, tEntry end
+    if tEntry > tExit then
+        tEntry, tExit = tExit, tEntry
+    end
 
     -- Return max entry time and min exit time (valid range for collision)
     return math.max(t0, tEntry), math.min(t1, tExit)
@@ -323,49 +331,51 @@ end
 -- and determines the **collision normal** (direction of impact).
 -- It prevents tunneling by checking **when** the collision happens (0-1 scale).
 local function sweptAABB(self, other, startX, startY, endX, endY)
-    if not self:canCollideWith(other) then return nil, 0, 0 end
-    if not self.collideRect or not other.collideRect then return nil, 0, 0 end
+    if not self:canCollideWith(other) then return -1, 0, 0 end
+    if not self.collideRect or not other.collideRect then return -1, 0, 0 end
 
     -- Compute movement vector
     local dx, dy = endX - startX, endY - startY
 
+    -- Adjust the start and end values to be relative to sprite's upper left corner
+    startX, startY = startX - math.floor(self.width * self._centerX), startY - math.floor(self.height * self._centerY)
+    endX, endY = endX - math.floor(self.width * self._centerX), endY - math.floor(self.height * self._centerY)
+
     -- Default values:
-    local ti = 1  -- Time of impact (1 = full movement allowed, 0 = instant collision)
+    local ti = -1  -- Time of impact (1 = full movement allowed, 0 = instant collision)
     local normalX, normalY = 0, 0  -- Collision normal
+
+    local oLeftX, oTopY = other:getCenterPoint()
+
+    local axes = {
+        { "x", dx, startX + self.collideRect.x, startX + self.collideRect.x + self.collideRect.width, oLeftX + other.collideRect.x, oLeftX + other.collideRect.x + other.collideRect.width},
+        { "y", dy, startY + self.collideRect.y, startY + self.collideRect.y + self.collideRect.height, oTopY + other.collideRect.y, oTopY + other.collideRect.y + other.collideRect.height}
+    }
 
     -- **Check Collisions on X and Y Axis Separately**
     -- Loop through **X and Y axes**, applying `entryExit()` to both
-    for _, axis in ipairs({ { "x", dx }, { "y", dy } }) do
-        local key, ds = axis[1], axis[2]
-
-        -- Get bounds of moving sprite
-        local sMin, sMax = startX + self.collideRect.x, startX + self.collideRect.x + self.collideRect.width
-        -- Get bounds of colliding object
-        local oMin, oMax = other.x + other.collideRect.x, other.x + other.collideRect.x + other.collideRect.width
-
-        -- Adjust values for Y axis if needed
-        if key == "y" then
-            sMin, sMax = startY + self.collideRect.y, startY + self.collideRect.y + self.collideRect.height
-            oMin, oMax = other.y + other.collideRect.y, other.y + other.collideRect.y + other.collideRect.height
-        end
+    for _, axis in ipairs(axes) do
+        local axisName, distanceOnAxis = axis[1], axis[2]
+        local sMin, sMax = axis[3], axis[4]
+        local oMin, oMax = axis[5], axis[6]
 
         -- **Get the earliest and latest possible collision times for this axis**
-        local tEntry, tExit = entryExit(0, 1, ds, sMin, sMax, oMin, oMax)
+        local tEntry, tExit = entryExit(0, 1, distanceOnAxis, sMin, sMax, oMin, oMax)
 
         -- **Check if collision is valid**
         -- If there is **no collision** (entry after exit), return no impact
-        if not tEntry or tEntry > tExit or tExit < 0 or tEntry > 1 then
-            return nil, 0, 0  -- No collision
+        if tEntry < 0 or tEntry > tExit or tExit < 0 or tEntry > 1 then
+            return -1, 0, 0  -- No collision
         end
 
-        -- **Track the earliest collision (smallest `ti`)**
-        if tEntry < ti then
+        -- **Update collision time if this axis is the later collision**
+        if tEntry >= ti then
             ti = tEntry  -- Update the earliest collision time
 
             -- Set collision normal:
             -- - If movement is in positive direction, normal is `-1`
             -- - If movement is in negative direction, normal is `1`
-            if key == "x" then
+            if axisName == "x" then
                 normalX = (dx > 0) and -1 or 1
             else
                 normalY = (dy > 0) and -1 or 1
@@ -384,40 +394,82 @@ function meta:checkCollisions(goalX, goalY)
     local normalX, normalY = 0, 0
     local overlaps = false
 
+    local actualX, actualY = goalX, goalY
+
     -- already overlapping another sprite?
     for _, other in ipairs(allSprites) do
-        if other ~= self and checkAABBCollision(self, other) then
-            overlaps = true
-            break
-        end
-    end
-
-    -- Check for possible future collisions
-    for _, other in ipairs(allSprites) do
         if other ~= self then
-
             local tImpact, nx, ny = sweptAABB(self, other, self.x, self.y, goalX, goalY)
 
-            if tImpact then
-                ti = math.min(ti, tImpact)
+            -- tImpact will be >= 0 if there was a collision, -1 otherwise
+            if tImpact >= 0 then
+                -- Check if sprites were already overlapping
+                local overlaps = checkAABBCollision(self, other)
+
                 normalX, normalY = nx, ny
-                table.insert(collisions, {
+
+                local response = "freeze"  -- Default collision behavior
+
+                -- **Check if `collisionResponse` is a function or string**
+                if type(self.collisionResponse) == "function" then
+                    response = self:collisionResponse(other) or "freeze"  -- Call function with `other`
+                elseif type(self.collisionResponse) == "string" then
+                    response = self.collisionResponse
+                end
+
+                -- get the screen space of the top left corner of the two sprite's collision rects
+                local oLeftX, oTopY = other:getCenterPoint()
+                oLeftX = oLeftX + other.collideRect.x
+                oTopY = oTopY + other.collideRect.y
+
+                local collisionTouch = playdate.geometry.point.new(self.x + moveX * tImpact, self.y + moveY * tImpact)
+                local colLeftX, colTopY = collisionTouch.x - math.floor(self.width * self._centerX), collisionTouch.y - math.floor(self.height * self._centerY)
+
+                local col = {
                     sprite = self,
                     other = other,
-                    type = self.collisionResponse,
+                    type = response,
                     overlaps = overlaps,
                     ti = tImpact,
-                    move = { x = moveX * ti, y = moveY * ti },
-                    normal = { x = normalX, y = normalY },
-                    touch = { x = self.x + moveX * ti, y = self.y + moveY * ti },
-                    spriteRect = self.collideRect,
-                    otherRect = other.collideRect
-                })
+                    move = playdate.geometry.vector2D.new(moveX * tImpact, moveY * tImpact),
+                    normal = playdate.geometry.vector2D.new(normalX, normalY),
+                    touch = collisionTouch,
+                    spriteRect = playdate.geometry.rect.new(colLeftX, colTopY, self.collideRect.width, self.collideRect.height),
+                    otherRect = playdate.geometry.rect.new(oLeftX, oTopY, other.collideRect.width, other.collideRect.height),
+                }
+                
+                -- **Handle Different Collision Types**
+
+                local destX, destY = goalX, goalY
+                if response == "slide" then
+                    -- **Slide:** Stop movement in the direction of collision
+                    if col.normal.x ~= 0 then destX = col.touch.x end
+                    if col.normal.y ~= 0 then destY = col.touch.y end
+                    col.slide = playdate.geometry.point.new(destX, destY)
+                elseif response == "bounce" then
+                    -- **Bounce:** Reflect movement based on collision normal
+                    local bounceX = (goalX - self.x) * (1 - math.abs(col.normal.x) * 2)
+                    local bounceY = (goalY - self.y) * (1 - math.abs(col.normal.y) * 2)
+                    destX = self.x + bounceX
+                    destY = self.y + bounceY
+                    col.bounce = playdate.geometry.point.new(destX, destY)
+                else
+                    -- **Freeze:** Stop movement completely (this is the default if an invalid mode is given)
+                    destX, destY = col.touch.x, col.touch.y
+                end
+
+                -- if this is the earliest collision, then update the actual ending position
+                if tImpact < ti then
+                    ti = tImpact
+                    actualX, actualY = destX, destY
+                end
+
+                table.insert(collisions, col)
             end
         end
     end
 
-    return goalX, goalY, collisions, #collisions
+    return actualX, actualY, collisions, #collisions
 end
 
 function meta:overlappingSprites()
@@ -447,41 +499,6 @@ function meta:moveWithCollisions(goalX, goalY)
     if count == 0 then
         self:moveTo(goalX, goalY)
         return actualX, actualY, collisions, count
-    end
-
-    -- Iterate through each collision
-    for _, col in ipairs(collisions) do
-        local other = col.other
-        local response = "freeze"  -- Default collision behavior
-
-        -- **Check if `collisionResponse` is a function or string**
-        if type(self.collisionResponse) == "function" then
-            response = self:collisionResponse(other) or "freeze"  -- Call function with `other`
-        elseif type(self.collisionResponse) == "string" then
-            response = self.collisionResponse
-        end
-
-        -- **Handle Different Collision Types**
-        if response == "slide" then
-            -- **Slide:** Stop movement in the direction of collision
-            if col.normal.x ~= 0 then actualX = col.touch.x end
-            if col.normal.y ~= 0 then actualY = col.touch.y end
-
-        elseif response == "freeze" then
-            -- **Freeze:** Stop movement completely
-            actualX, actualY = self.x, self.y  -- Reset to original position
-
-        elseif response == "overlap" then
-            -- **Overlap:** Ignore collision, allow full movement
-            actualX, actualY = goalX, goalY
-
-        elseif response == "bounce" then
-            -- **Bounce:** Reflect movement based on collision normal
-            local bounceX = (goalX - self.x) * (1 - math.abs(col.normal.x) * 2)
-            local bounceY = (goalY - self.y) * (1 - math.abs(col.normal.y) * 2)
-            actualX = self.x + bounceX
-            actualY = self.y + bounceY
-        end
     end
 
     -- Move sprite to final position based on response
