@@ -41,40 +41,40 @@ end
 
 -- docs: https://sdk.play.date/3.0.0/Inside%20Playdate.html#C-geometry.vector2D
 
-local vector2d = {}
-playdate.geometry.vector2d = vector2d
-vector2d.meta = {}
-vector2d.meta.__index = vector2d.meta
-vector2d.meta.type = "vector2d"
+local vector2D = {}
+playdate.geometry.vector2D = vector2D
+vector2D.meta = {}
+vector2D.meta.__index = vector2D.meta
+vector2D.meta.type = "vector2D"
 
-vector2d.meta.__mul = function (a, b)
+vector2D.meta.__mul = function (a, b)
   -- TODO-Playbit: should also accept a vector (for dot product) or transform
-  @@ASSERT(type(b) == "number", "[ERR] Invalid multiplication operation with a vector2d. Second operand must be a number.")
-  return vector2d.new(a.x * b, a.y * b)
+  @@ASSERT(type(b) == "number", "[ERR] Invalid multiplication operation with a vector2D. Second operand must be a number.")
+  return vector2D.new(a.x * b, a.y * b)
 end
 
-vector2d.meta.__div = function (a, b)
-  @@ASSERT(type(b) == "number", "[ERR] Invalid division operation with a vector2d. Second operand must be a number.")
-  return vector2d.new(a.x / b, a.y / b)
+vector2D.meta.__div = function (a, b)
+  @@ASSERT(type(b) == "number", "[ERR] Invalid division operation with a vector2D. Second operand must be a number.")
+  return vector2D.new(a.x / b, a.y / b)
 end
 
-vector2d.meta.__add = function (a, b)
-  @@ASSERT(b.type == "vector2d", "[ERR] Invalid addition operation with a vector2d. Can only add two vectors")
-  return vector2d.new(a.x + b.x, a.y + b.y)
+vector2D.meta.__add = function (a, b)
+  @@ASSERT(b.type == "vector2D", "[ERR] Invalid addition operation with a vector2D. Can only add two vectors")
+  return vector2D.new(a.x + b.x, a.y + b.y)
 end
 
-vector2d.meta.__sub = function (a, b)
-  @@ASSERT(b.type == "vector2d", "[ERR] Invalid subtraction operation with a vector2d. Can only subtract two vectors")
-  return vector2d.new(a.x - b.x, a.y - b.y)
+vector2D.meta.__sub = function (a, b)
+  @@ASSERT(b.type == "vector2D", "[ERR] Invalid subtraction operation with a vector2D. Can only subtract two vectors")
+  return vector2D.new(a.x - b.x, a.y - b.y)
 end
 
-vector2d.meta.__unm = function (a)
-  return vector2d.new(-a.x, -a.y)
+vector2D.meta.__unm = function (a)
+  return vector2D.new(-a.x, -a.y)
 end
 
--- TODO-Playbit: Need to fully implement vector2d
-function vector2d.new(x, y)
-  local newVector2d = setmetatable({}, vector2d.meta)
+-- TODO-Playbit: Need to fully implement vector2D
+function vector2D.new(x, y)
+  local newVector2d = setmetatable({}, vector2D.meta)
 
   newVector2d.x = x
   newVector2d.y = y
@@ -82,8 +82,8 @@ function vector2d.new(x, y)
   return newVector2d
 end
 
-function vector2d.meta:offsetBy(dx, dy)
-  return vector2d.new(self.x + dx, self.y + dy)
+function vector2D.meta:offsetBy(dx, dy)
+  return vector2D.new(self.x + dx, self.y + dy)
 end
 
 -- docs: https://sdk.play.date/3.0.0/Inside%20Playdate.html#C-geometry.point 
@@ -95,13 +95,13 @@ point.meta.__index = point.meta
 point.meta.type = "point"
 
 point.meta.__add = function (a, b)
-  @@ASSERT(b.type == "vector2d", "[ERR] Invalid addition operation with a point. Can only add point with vector")
+  @@ASSERT(b.type == "vector2D", "[ERR] Invalid addition operation with a point. Can only add point with vector")
   return point.new(a.x + b.x, a.y + b.y)
 end
 
 point.meta.__sub = function (a, b)
   @@ASSERT(b.type == "point", "[ERR] Invalid subtraction operation with a point. Can only subtract two points")
-  return vector2d.new(a.x - b.x, a.y - b.y)
+  return vector2D.new(a.x - b.x, a.y - b.y)
 end
 
 -- TODO-Playbit: Need to fully implement point
@@ -164,3 +164,49 @@ function arc.meta:pointOnArc(distance, extend)
 
   return point.new(newX, newY)
 end
+
+-- docs: https://sdk.play.date/3.0.0/Inside%20Playdate.html#C-geometry.rect
+
+local rect = {}
+playdate.geometry.rect = rect
+rect.meta = {}
+rect.meta.__index = rect.meta
+rect.meta.type = "rect"
+
+function rect.new(x, y, width, height)
+  local self = setmetatable({}, rect.meta)
+  self.x = x
+  self.y = y
+  self.width = width
+  self.height = height
+  return self
+end
+
+function rect:copy()
+  return rect.new(self.x, self.y, self.width, self.height)
+end
+
+function rect:toPolygon()
+  error("[ERR] playdate.geometry.rect.toPolygon() is not yet implemented.")
+end
+
+function rect:unpack()
+  return x, y, width, height
+end
+
+function rect:isEmpty()
+  return self.width == 0 or self.height == 0
+end
+
+function rect:isEqual(r2)
+  return self.x == r2.x and self.y == r2.y and self.width == r2.width and self.height == r2.height
+end
+
+function rect:intersects(r2)
+  error("[ERR] playdate.geometry.rect.intersects() is not yet implemented.")
+end
+
+function rect:intersection(r2)
+  error("[ERR] playdate.geometry.rect.intersection() is not yet implemented.")
+end
+
