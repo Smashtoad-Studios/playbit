@@ -243,7 +243,12 @@ function meta:drawScaled(x, y, scale, yscale)
 end
 
 function meta:scaledImage(scale, yscale)
-  error("[ERR] playdate.graphics.image:scaledImage() is not yet implemented.")
+  yscale = yscale or scale
+  local scaledImg = module.new(self.width * scale, self.height * yscale)
+  playdate.graphics.pushContext(scaledImg)
+    self:drawScaled(0, 0, scale, yscale)
+  playdate.graphics.popContext()
+  return scaledImg
 end
 
 
