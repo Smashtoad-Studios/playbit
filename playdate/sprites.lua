@@ -58,25 +58,27 @@ function meta:init(imageOrTilemap)
 end
 
 function module.new(imageOrTilemap)
-    local sprite = setmetatable({}, meta)
+    local self = setmetatable({}, meta)
 
-    sprite.visible = true
-    sprite.zIndex = 0
-    sprite.collideRect = nil
-    sprite.animator = nil
-    sprite.canUpdate = true
-    sprite.drawMode = playdate.graphics.kDrawModeCopy
+    self.visible = true
+    self.zIndex = 0
+    self.collideRect = nil
+    self.animator = nil
+    self.canUpdate = true
+    self.drawMode = playdate.graphics.kDrawModeCopy
+    self.scaleX = 1
+    self.scaleY = 1
 
-    sprite:setRotation(0, 1)
-    sprite:setCenter(0.5, 0.5)
-    sprite:resetGroupMask()
-    sprite:resetCollidesWithGroupsMask()
+    self:init(imageOrTilemap)
 
-    sprite:init(imageOrTilemap)
+    self:setRotation(0, 1)
+    self:setCenter(0.5, 0.5)
+    self:resetGroupMask()
+    self:resetCollidesWithGroupsMask()
 
     -- TODO-Playbit: Playdate does kinda do this... but they don't automatically draw, so it's slightly different
     -- table.insert(allSprites, sprite)
-    return sprite
+    return self
 end
 
 function module.baseObject()
@@ -116,7 +118,8 @@ function meta:setImage(image)
     if not image then
         self:setSize(0, 0)
     else
-        self:setSize(image:getSize())
+        self.width = self.image.width * self.scaleX
+        self.height = self.image.height * self.scaleY
     end
 end
 
@@ -130,7 +133,10 @@ function meta:setImageDrawMode(mode)
 end
 
 function meta:setSize(w, h)
-    self.width, self.height = w, h
+    if self.image == nil then
+        self._baseWidth, self._baseHeight = w, h
+        self.width, self.height = w, h
+    end
 end
 
 function meta:getSize()
@@ -292,13 +298,13 @@ local function checkAABBCollision(self, other)
     if not self:canCollideWith(other) then return false end
     if not self.collideRect or not other.collideRect then return false end
 
-    local sLeftX, sTopY = self:getCenterPoint()
-    local oLeftX, oTopY = other:getCenterPoint()
+    local sLeftX, sTopY = self:getTopLeftPosition()
+    local oLeftX, oTopY = other:getTopLeftPosition()
 
-    return sLeftX + self.collideRect.x < oLeftX + other.collideRect.x + other.collideRect.width
-        and sLeftX + self.collideRect.x + self.collideRect.width > oLeftX + other.collideRect.x
-        and sTopY + self.collideRect.y < oTopY + other.collideRect.y + other.collideRect.height
-        and sTopY + self.collideRect.y + self.collideRect.height > oTopY + other.collideRect.y
+    return sLeftX + self.scaleX * self.collideRect.x < oLeftX + other.scaleX * (other.collideRect.x + other.collideRect.width)
+        and sLeftX + self.scaleX * (self.collideRect.x + self.collideRect.width) > oLeftX + other.scaleX * other.collideRect.x
+        and sTopY + self.scaleY *  self.collideRect.y < oTopY + other.scaleY * (other.collideRect.y + other.collideRect.height)
+        and sTopY + self.scaleY * (self.collideRect.y + self.collideRect.height) > oTopY + other.scaleY * other.collideRect.y
 end
 
 
@@ -345,11 +351,11 @@ local function sweptAABB(self, other, startX, startY, endX, endY)
     local ti = -1  -- Time of impact (1 = full movement allowed, 0 = instant collision)
     local normalX, normalY = 0, 0  -- Collision normal
 
-    local oLeftX, oTopY = other:getCenterPoint()
+    local oLeftX, oTopY = other:getTopLeftPosition()
 
     local axes = {
-        { "x", dx, startX + self.collideRect.x, startX + self.collideRect.x + self.collideRect.width, oLeftX + other.collideRect.x, oLeftX + other.collideRect.x + other.collideRect.width},
-        { "y", dy, startY + self.collideRect.y, startY + self.collideRect.y + self.collideRect.height, oTopY + other.collideRect.y, oTopY + other.collideRect.y + other.collideRect.height}
+        { "x", dx, startX + self.collideRect.x * self.scaleX, startX + self.scaleX * (self.collideRect.x + self.collideRect.width), oLeftX + other.collideRect.x * other.scaleX, oLeftX + other.scaleX * (other.collideRect.x + other.collideRect.width)},
+        { "y", dy, startY + self.collideRect.y * self.scaleY, startY + self.scaleY * (self.collideRect.y + self.collideRect.height), oTopY + other.collideRect.y * other.scaleY, oTopY + other.scaleY * (other.collideRect.y + other.collideRect.height)}
     }
 
     -- **Check Collisions on X and Y Axis Separately**
@@ -418,9 +424,9 @@ function meta:checkCollisions(goalX, goalY)
                 end
 
                 -- get the screen space of the top left corner of the two sprite's collision rects
-                local oLeftX, oTopY = other:getCenterPoint()
-                oLeftX = oLeftX + other.collideRect.x
-                oTopY = oTopY + other.collideRect.y
+                local oLeftX, oTopY = other:getTopLeftPosition()
+                oLeftX = oLeftX + other.collideRect.x * other.scaleX
+                oTopY = oTopY + other.collideRect.y * other.scaleY
 
                 local collisionTouch = playdate.geometry.point.new(self.x + moveX * tImpact, self.y + moveY * tImpact)
                 local colLeftX, colTopY = collisionTouch.x - math.floor(self.width * self._centerX), collisionTouch.y - math.floor(self.height * self._centerY)
@@ -434,8 +440,8 @@ function meta:checkCollisions(goalX, goalY)
                     move = playdate.geometry.vector2D.new(moveX * tImpact, moveY * tImpact),
                     normal = playdate.geometry.vector2D.new(normalX, normalY),
                     touch = collisionTouch,
-                    spriteRect = playdate.geometry.rect.new(colLeftX, colTopY, self.collideRect.width, self.collideRect.height),
-                    otherRect = playdate.geometry.rect.new(oLeftX, oTopY, other.collideRect.width, other.collideRect.height),
+                    spriteRect = playdate.geometry.rect.new(colLeftX, colTopY, self.collideRect.width * self.scaleX, self.collideRect.height * self.scaleY),
+                    otherRect = playdate.geometry.rect.new(oLeftX, oTopY, other.collideRect.width * other.scaleX, other.collideRect.height * other.scaleY),
                 }
                 
                 -- **Handle Different Collision Types**
@@ -509,6 +515,14 @@ end
 function meta:setScale(scale, yScale)
     self.scaleX = scale
     self.scaleY = yScale or scale
+    if not self.image then
+        self.width = self._baseWidth * self.scaleX
+        self.width = self._baseHeight * self.scaleX
+    else
+        self.width = self.image.width * self.scaleX
+        self.height = self.image.height * self.scaleY
+    end
+    
 end
 
 function meta:getScale()
@@ -549,6 +563,10 @@ function meta:getCenter()
 end
 
 function meta:getCenterPoint()
+    return playdate.geometry.point.new(self._centerX, self._centerY)
+end
+
+function meta:getTopLeftPosition()
     return self.x - math.floor(self.width * self._centerX), self.y - math.floor(self.height * self._centerY)
 end
 
@@ -597,12 +615,11 @@ function meta:draw()
             love.graphics.setScissor(self.clipRect.x, -self.clipRect.y, self.clipRect.width, self.clipRect.height)
         end
 
-        -- TODO check to see if sprites are being drawed at fractional pixel values. If so, round them.
         love.graphics.draw(self.image.data,
             self.x, self.y,
             math.rad(self.rotation),
             self.scaleX, self.scaleY,
-            math.floor(self.width * self._centerX), math.floor(self.height * self._centerY)
+            math.floor(self.width / self.scaleX * self._centerX), math.floor(self.height / self.scaleY * self._centerY)
         )
 
         -- clear the clip rect
@@ -638,7 +655,7 @@ function module.updateAll()
             end
             spr:update()
             if not spr.image then
-                local posX, posY = spr:getCenterPoint()
+                local posX, posY = spr:getTopLeftPosition()
                 local drawWidth = spr.width
                 local drawHeight = spr.height
                 
