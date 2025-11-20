@@ -654,53 +654,53 @@ function module.updateAll()
                 end
             end
             spr:update()
-            if not spr.image then
-                local posX, posY = spr:getTopLeftPosition()
-                local drawWidth = spr.width
-                local drawHeight = spr.height
-                
-                -- if the sprite does not have an image, translate so that drawing will happen relative to the sprite
-                love.graphics.push()
-                love.graphics.translate(posX, posY)
-                
-                local maxWidth, maxHeight = love.graphics.getCanvas():getDimensions()
+        end
+        if not spr.image then
+            local posX, posY = spr:getTopLeftPosition()
+            local drawWidth = spr.width
+            local drawHeight = spr.height
+            
+            -- if the sprite does not have an image, translate so that drawing will happen relative to the sprite
+            love.graphics.push()
+            love.graphics.translate(posX, posY)
+            
+            local maxWidth, maxHeight = love.graphics.getCanvas():getDimensions()
 
-                local drawOffsetX = 0
-                local drawOffsetY = 0
+            local drawOffsetX = 0
+            local drawOffsetY = 0
 
-                -- if the sprite is off the canvas, offset the drawing position to be on the canvas
-                if posX < 0 then
-                    posX = -posX
-                    drawOffsetX = posX
-                    drawWidth = drawWidth - posX
-                end
-                if posY < 0 then
-                    posY = -posY
-                    drawOffsetY = posY
-                    drawHeight = drawHeight - posY
-                end
-
-                -- get the right / bottom positions to see if they extend passed the edge of the canvas
-                local posRight = posX + drawWidth
-                local posBottom = posY + drawHeight
-
-                -- if they do, then adjust the drawing size so that it stays on the canvas
-                if posRight > maxWidth then
-                    drawWidth = drawWidth - (posRight - maxWidth)
-                end
-                if posBottom > maxHeight then
-                    drawHeight = drawHeight - (posBottom - maxHeight)
-                end
-
-                playbit.graphics.shader:send("screenOffset", {posX + drawOffsetX, posY + drawOffsetY})
-
-                spr:draw(drawOffsetX, drawOffsetY, drawWidth, drawHeight)
-                love.graphics.pop()
-                playbit.graphics.shader:send("screenOffset", {0, 0})
-            else
-                -- TODO make this different, because the docs say draw is only called if the sprite doesn't have an image
-                spr:draw()
+            -- if the sprite is off the canvas, offset the drawing position to be on the canvas
+            if posX < 0 then
+                posX = -posX
+                drawOffsetX = posX
+                drawWidth = drawWidth - posX
             end
+            if posY < 0 then
+                posY = -posY
+                drawOffsetY = posY
+                drawHeight = drawHeight - posY
+            end
+
+            -- get the right / bottom positions to see if they extend passed the edge of the canvas
+            local posRight = posX + drawWidth
+            local posBottom = posY + drawHeight
+
+            -- if they do, then adjust the drawing size so that it stays on the canvas
+            if posRight > maxWidth then
+                drawWidth = drawWidth - (posRight - maxWidth)
+            end
+            if posBottom > maxHeight then
+                drawHeight = drawHeight - (posBottom - maxHeight)
+            end
+
+            playbit.graphics.shader:send("screenOffset", {posX + drawOffsetX, posY + drawOffsetY})
+
+            spr:draw(drawOffsetX, drawOffsetY, drawWidth, drawHeight)
+            love.graphics.pop()
+            playbit.graphics.shader:send("screenOffset", {0, 0})
+        else
+            -- TODO make this different, because the docs say draw is only called if the sprite doesn't have an image
+            spr:draw()
         end
     end
 end
