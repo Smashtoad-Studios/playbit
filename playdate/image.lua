@@ -403,7 +403,25 @@ function meta:invertedImage()
 end
 
 function meta:blendWithImage(image, alpha, ditherType)
-  error("[ERR] playdate.graphics.image:blendWithImage() is not yet implemented.")
+  local baseImg = self:copy()
+  local blendImg = image:copy()
+
+  -- create the blended image by drawing a masked version
+  -- of the other image on top of the base image
+  
+  local blendMask = playdate.graphics.image.new(self.width, self.height, playdate.graphics.kColorWhite)
+  playdate.graphics.pushContext(blendMask)
+    playdate.graphics.setColor(playdate.graphics.kColorBlack)
+    playdate.graphics.setDitherPattern(1 - alpha, ditherType)
+    playdate.graphics.fillRect(0, 0, self.width, self.height)
+  playdate.graphics.popContext()
+
+  blendImg:setMaskImage(blendMask)
+  playdate.graphics.pushContext(baseImg)
+    blendImg:draw(0, 0)
+  playdate.graphics.popContext()
+
+  return baseImg
 end
 
 function meta:vcrPauseFilterImage()
