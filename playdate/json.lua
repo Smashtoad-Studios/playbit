@@ -32,7 +32,7 @@ function module.encodeToFile(path, pretty, table)
   -- Extract the directory path from the full file path
   local directory = path:match("(.*/)")
 
-  -- If a directory path exists, create it
+  -- If a directory is in the path, recursively create the directories if they do not exist
   if directory then
     love.filesystem.createDirectory(directory)
   end

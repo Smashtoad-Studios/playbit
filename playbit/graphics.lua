@@ -11,6 +11,12 @@ module.COLOR_BLACK = { 49 / 255, 46 / 255, 40 / 255, 1 }
 module.COLOR_CLEAR = { 0, 0, 0, 0 }
 module.MODE_KEY = "mode"
 
+module.CANVAS_WIDTH = 400
+module.CANVAS_HEIGHT = 240
+
+module.canvas = love.graphics.newCanvas(module.CANVAS_WIDTH, module.CANVAS_HEIGHT)
+module.frameBufferCanvas = love.graphics.newCanvas(module.CANVAS_WIDTH, module.CANVAS_HEIGHT)
+
 module.colorWhite = module.COLOR_WHITE
 module.colorBlack = module.COLOR_BLACK
 module.colorClear = module.COLOR_CLEAR
@@ -19,9 +25,6 @@ module.lastClearColor = module.colorWhite
 module.shader = love.graphics.newShader("playdate/shader")
 
 module.drawOffset = { x = 0, y = 0}
-
-module.canvas = love.graphics.newCanvas()
-module.frameBufferCanvas = love.graphics.newCanvas()
 
 module.activeContext = nil
 module.contextStack = {}
@@ -89,11 +92,8 @@ module.ditherThresholds = {
 }
 
 local canvasScale = 1
-local canvasWidth, canvasHeight = love.graphics.getDimensions()
 local canvasX = 0
 local canvasY = 0
-local windowWidth, windowHeight = love.graphics.getDimensions()
-local fullscreen = false
 
 --- Sets the scale of the canvas.
 ---@param scale number
@@ -107,19 +107,11 @@ function module.getCanvasScale()
   return canvasScale
 end
 
---- Sets the canvas size.
----@param width number
----@param height number
-function module.setCanvasSize(width, height)
-  canvasWidth = width
-  canvasHeight = height
-end
-
 --- Returns the current canvas size.
 ---@return integer width
 ---@return integer height
 function module.getCanvasSize()
-  return canvasWidth, canvasHeight
+  return module.CANVAS_WIDTH, module.CANVAS_HEIGHT
 end
 
 --- Sets the canvas position within the window.
@@ -140,33 +132,14 @@ end
 --- Sets the size of the window.
 ---@param width number
 ---@param height number
-function module.setWindowSize(width, height)
-  windowWidth = width
-  windowHeight = height
+function module.setCanvasSize(width, height)
+  local width = width == nil and love.graphics.getWidth() or width
+  local height = height == nil and love.graphics.getHeight() or height
 
-  canvasScale = math.min(windowWidth / canvasWidth, windowHeight / canvasHeight)
-
-  canvasX = (windowWidth - canvasWidth * canvasScale) / 2
-  canvasY = (windowHeight - canvasHeight * canvasScale) / 2
-end
-
---- Returns the current window size.
----@return integer width
----@return integer height
-function module.getWindowSize()
-  return windowWidth, windowHeight
-end
-
---- Sets fullscreen (true) or window mode (false).
----@param enabled any
-function module.setFullscreen(enabled)
-  fullscreen = enabled
-end
-
---- Returns if the game is in fullscreen (true) or window mode (false).
----@return boolean
-function module.getFullscreen()
-  return fullscreen
+  canvasScale = math.min(width / module.CANVAS_WIDTH, height / module.CANVAS_HEIGHT)
+  
+  canvasX = (width - module.CANVAS_WIDTH * canvasScale) / 2
+  canvasY = (height - module.CANVAS_HEIGHT * canvasScale) / 2
 end
 
 --- Sets the colors used when drawing graphics.

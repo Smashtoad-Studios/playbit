@@ -1,0 +1,17 @@
+{
+    "width": 1920,
+    "height": 1080,
+    "fullscreen": true,
+    "resizable": false,
+    "borderless": false,
+    "vsync": true,
+    "msaa": 0,
+    "minwidth": 400,
+    "minheight": 240,
+    "highdpi": false,
+    "fullscreentype": "desktop",
+    "depth": 0,
+    "centered": true,
+    "display": 1,
+    "usedpiscale": true
+}

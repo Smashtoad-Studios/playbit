@@ -1,7 +1,12 @@
 !if LOVE2D then
-require("playbit.graphics")
 require("playbit.logger")
-playbit.logger.setLoggerLevels({playbit.logger.LOGGER_LEVELS.ERROR, playbit.logger.LOGGER_LEVELS.WARNING})
+playbit.logger.setLoggerLevels({playbit.logger.LOGGER_LEVELS.ERROR, playbit.logger.LOGGER_LEVELS.WARNING, playbit.logger.LOGGER_LEVELS.INFO})
+
+require("playbit.settings")
+playbit.settings.loadSettings()
+playbit.settings.setWindow()
+
+require("playbit.graphics")
 
 --[[ since there is no CoreLibs/playdate, this file should always 
 be included here so the methods are always available ]]--
@@ -22,9 +27,6 @@ function import(path)
 end
 
 local firstFrame = true
--- The frame buffer is used for XOR and NXOR draw modes
-local framebuffer
-local windowWidth, windowHeight = playbit.graphics.getWindowSize()
 
 playbit.graphics.canvas:setFilter("nearest", "nearest")
 playbit.graphics.frameBufferCanvas:setFilter("nearest", "nearest")
@@ -40,37 +42,9 @@ math.randomseed(os.time())
 local font = playdate.graphics.font.new("fonts/Phozon/Phozon")
 playdate.graphics.setFont(font)
 
-playbit.graphics.setWindowSize(windowWidth, windowHeight)
+playbit.settings.setMode()
 
 function love.draw()
-  -- must be changed at start of frame when canvas is not active
-  local newCanvasWidth, newCanvasHeight = playbit.graphics.getCanvasSize()
-  local canvasWidth = playbit.graphics.canvas:getWidth()
-  local canvasHeight = playbit.graphics.canvas:getHeight()
-  if canvasWidth ~= newCanvasWidth or canvasHeight ~= newCanvasHeight then
-    playbit.graphics.canvas = love.graphics.newCanvas(newCanvasWidth, newCanvasHeight)
-  end
-
-  -- must be changed at start of frame - love2d doesn't allow changing window size with canvas active
-  local newWindowWidth, newWindowHeight = playbit.graphics.getWindowSize()
-  local fullscreen = playbit.graphics.getFullscreen()
-  local w, y, flags = love.window.getMode()
-  if windowWidth ~= newWindowWidth or windowHeight ~= newWindowHeight or flags.fullscreen ~= fullscreen then
-    flags.fullscreen = fullscreen
-
-    -- stop window from ending up off screen when switching back from fullscreen
-    if flags.x < 50 then
-      flags.x = 50
-    end
-    if flags.y < 50 then
-      flags.y = 50
-    end
-
-    love.window.setMode(newWindowWidth, newWindowHeight, flags)
-    windowWidth = newWindowWidth
-    windowHeight = newWindowHeight
-  end
-
   -- render to canvas to allow 2x scaling
   love.graphics.setCanvas({playbit.graphics.canvas, stencil=true})
   love.graphics.setShader(playbit.graphics.shader)
@@ -126,14 +100,14 @@ function love.draw()
   -- update emulated input
   playdate.updateInput()
   playdate.graphics.animation.loop.update()
-   -- TODO-Playbit: not a native Playdate SDK functions. Move to Playbit?
-   playdate.sound.sampleplayer.update()
-   -- TODO-Playbit: not a native Playdate SDK functions. Move to Playbit?
+  -- TODO-Playbit: not a native Playdate SDK functions. Move to Playbit?
+  playdate.sound.sampleplayer.update()
+  -- TODO-Playbit: not a native Playdate SDK functions. Move to Playbit?
   playdate.sound.fileplayer.update()
 end
 
 function love.resize(w, h)
-  playbit.graphics.setWindowSize(w, h)
+  playbit.graphics.setCanvasSize(w, h)
 end
 
 function love.run()
