@@ -135,6 +135,11 @@ function module.getFullscreen()
     return module.settings.fullscreen
 end
 
+function module.setFullscreen(isFullscreen)
+    module.settings.fullscreen = isFullscreen
+end
+
+
 function module.getDisplayIndex()
     return module.settings.display
 end
